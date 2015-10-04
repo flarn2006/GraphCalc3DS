@@ -12,10 +12,11 @@ RpnInstruction::RpnInstruction(float value)
 	this->value = value;
 }
 
-RpnInstruction::RpnInstruction(float *var)
+RpnInstruction::RpnInstruction(float *var, const char *name)
 {
 	op = OP_PUSHVAR;
 	this->var = var;
+	this->name = name;
 }
 
 RpnInstruction::RpnInstruction(func_t func, const char *name)
@@ -156,6 +157,7 @@ std::ostream &operator<<(std::ostream &os, const RpnInstruction &inst)
 		case RpnInstruction::OP_NEGATE:
 			os << '\xF1';
 			break;
+		case RpnInstruction::OP_PUSHVAR:
 		case RpnInstruction::OP_FUNCTION:
 			os << inst.name;
 			break;

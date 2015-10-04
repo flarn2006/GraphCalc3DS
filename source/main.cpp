@@ -2,6 +2,7 @@
 #include <sf2d.h>
 #include <vector>
 #include <cmath>
+#include <iostream>
 #include "ViewWindow.h"
 #include "RpnInstruction.h"
 
@@ -31,14 +32,20 @@ int main(int argc, char *argv[])
 	ViewWindow view(-5.0f, 5.0f, -3.0f, 3.0f);
 	
 	equation.push_back(1.25f);
-	equation.push_back(&exprX);
+	equation.push_back(RpnInstruction(&exprX, "x"));
 	equation.push_back(RpnInstruction::OP_MULTIPLY);
-	equation.push_back(&exprX);
+	equation.push_back(RpnInstruction(&exprX, "x"));
 	equation.push_back(RpnInstruction(std::cos, "cos"));
 	equation.push_back(RpnInstruction::OP_MULTIPLY);
 	
 	sf2d_init();
 	sf2d_set_clear_color(RGBA8(0xE0, 0xE0, 0xE0, 0xFF));
+	
+	consoleInit(GFX_BOTTOM, NULL);
+	
+	for (auto i = equation.begin(); i != equation.end(); i++) {
+		std::cout << *i << std::endl;
+	}
 	
 	while (aptMainLoop()) {
 		hidScanInput();

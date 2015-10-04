@@ -33,9 +33,11 @@ private:
 	Opcode op;
 	union {
 		float value;
-		float *var;
 		struct {
-			func_t func;
+			union {
+				float *var;
+				func_t func;
+			};
 			const char *name;
 		};
 	};
@@ -43,7 +45,7 @@ private:
 public:
 	RpnInstruction(Opcode opcode);
 	RpnInstruction(float value);
-	RpnInstruction(float *var);
+	RpnInstruction(float *var, const char *name);
 	RpnInstruction(func_t func, const char *name);
 	
 	Status Execute(std::vector<float> &stack) const;
