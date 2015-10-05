@@ -2,9 +2,11 @@
 #include <sf2d.h>
 #include <vector>
 #include <cmath>
-#include <iostream>
 #include "ViewWindow.h"
 #include "RpnInstruction.h"
+#include "TableLayout.h"
+#include "ControlGrid.h"
+#include "Button.h"
 
 std::vector<RpnInstruction> equation;
 float exprX;
@@ -38,18 +40,25 @@ int main(int argc, char *argv[])
 	equation.push_back(RpnInstruction(std::cos, "cos"));
 	equation.push_back(RpnInstruction::OP_MULTIPLY);
 	
+	ControlGrid<4, 4> cgrid(80, 60);
+	for (int r=0; r<4; r++) {
+		for (int c=0; c<4; c++) {
+			cgrid.cells[r][c].content = new Button();
+		}
+	}
+	
 	sf2d_init();
 	sf2d_set_clear_color(RGBA8(0xE0, 0xE0, 0xE0, 0xFF));
-	
-	consoleInit(GFX_BOTTOM, NULL);
-	
-	for (auto i = equation.begin(); i != equation.end(); i++) {
-		std::cout << *i << std::endl;
-	}
 	
 	while (aptMainLoop()) {
 		hidScanInput();
 		int keys = hidKeysHeld();
+		
+		touchPosition touch;
+		if (keys & KEY_TOUCH) {
+			hidTouchRead(&touch);
+		}
+		
 		if (keys & KEY_START) {
 			break;
 		}
@@ -71,6 +80,11 @@ int main(int argc, char *argv[])
 		
 		sf2d_start_frame(GFX_TOP, GFX_LEFT);
 		drawGraph(view, RGBA8(0x00, 0x00, 0xC0, 0xFF));
+		sf2d_end_frame();
+		
+		sf2d_start_frame(GFX_BOTTOM, GFX_LEFT);
+		cgrid.ScreenTouchStatus(keys & KEY_TOUCH, touch.px, touch.py);
+		cgrid.Draw();
 		sf2d_end_frame();
 		
 		sf2d_swapbuffers();
