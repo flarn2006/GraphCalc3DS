@@ -41,12 +41,12 @@ struct Rect
 		this->h = h;
 	}
 	
-	bool PointInside(_T x, _T y)
+	bool PointInside(_T x, _T y) const
 	{
 		return (x >= this->x) && (y >= this->y) && (x < this->x + w) && (y < this->y + h);
 	}
 	
-	bool PointInside(Point<_T> point)
+	bool PointInside(Point<_T> point) const
 	{
 		return PointInside(point.x, point.y);
 	}

@@ -26,6 +26,11 @@ RpnInstruction::RpnInstruction(func_t func, const char *name)
 	this->name = name;
 }
 
+RpnInstruction::Opcode RpnInstruction::GetOpcode() const
+{
+	return op;
+}
+
 RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 {
 	switch (op) {
@@ -143,10 +148,10 @@ std::ostream &operator<<(std::ostream &os, const RpnInstruction &inst)
 			os << '-';
 			break;
 		case RpnInstruction::OP_MULTIPLY:
-			os << '*';
+			os << '\xD7';
 			break;
 		case RpnInstruction::OP_DIVIDE:
-			os << '\xF6';
+			os << '\xF7';
 			break;
 		case RpnInstruction::OP_MODULO:
 			os << "mod";
@@ -155,7 +160,7 @@ std::ostream &operator<<(std::ostream &os, const RpnInstruction &inst)
 			os << '^';
 			break;
 		case RpnInstruction::OP_NEGATE:
-			os << '\xF1';
+			os << '\xB1';
 			break;
 		case RpnInstruction::OP_PUSHVAR:
 		case RpnInstruction::OP_FUNCTION:
@@ -180,6 +185,8 @@ RpnInstruction::Status ExecuteRpn(const std::vector<RpnInstruction> instructions
 	
 	if (stack.size() == 0) {
 		return RpnInstruction::S_UNDERFLOW;
+	} else if (stack.size() > 1) {
+		return RpnInstruction::S_OVERFLOW;
 	} else {
 		resultOut = stack.back();
 		return RpnInstruction::S_OK;

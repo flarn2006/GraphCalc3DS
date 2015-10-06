@@ -9,6 +9,7 @@ class RpnInstruction
 	
 public:
 	enum Opcode {
+		OP_NULL,
 		OP_PUSH,
 		OP_PUSHVAR,
 		OP_ADD,
@@ -23,6 +24,7 @@ public:
 	
 	enum Status {
 		S_OK,
+		S_OVERFLOW,
 		S_UNDERFLOW,
 		S_UNDEFINED
 	};
@@ -48,6 +50,7 @@ public:
 	RpnInstruction(float *var, const char *name);
 	RpnInstruction(func_t func, const char *name);
 	
+	Opcode GetOpcode() const;
 	Status Execute(std::vector<float> &stack) const;
 };
 

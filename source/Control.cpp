@@ -5,6 +5,10 @@ Control::Control()
 	touchState = TS_INACTIVE;
 }
 
+Control::~Control()
+{
+}
+
 void Control::Draw(int x, int y, int w, int h)
 {
 }

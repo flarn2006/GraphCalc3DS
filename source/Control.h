@@ -19,6 +19,8 @@ protected:
 	virtual void TouchEnd();
 	
 public:
+	virtual ~Control(); //for deleting without knowing control type
+
 	virtual void Draw(int x, int y, int w, int h);
 	virtual void TouchingInside(int x, int y);
 	virtual void TouchingOutside(int x, int y);

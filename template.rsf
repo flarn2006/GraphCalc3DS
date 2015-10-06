@@ -5,9 +5,9 @@ BasicInfo:
   ContentType             : Application
   Logo                    : Nintendo # Nintendo / Licensed / Distributed / iQue / iQueForSystem
 
-#Rom:
+RomFs:
   # Specifies the root path of the file system to include in the ROM.
-  # HostRoot                : "romfs"
+  RootPath                : "romfs"
 
 TitleInfo:
   UniqueId                : @@UNIQUE_ID@@
