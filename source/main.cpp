@@ -10,21 +10,34 @@
 #include "ControlGrid.h"
 #include "Button.h"
 #include "TextDisplay.h"
+#include "NumpadController.h"
 
 std::vector<RpnInstruction> equation;
 float exprX;
 sftd_font *font;
 TextDisplay *equDisp;
+NumpadController numpad;
 
 typedef ControlGrid<5, 7> cgrid_t;
 void SetUpControlGrid(cgrid_t &cgrid);
+
+void drawAxes(const ViewWindow &view, u32 color, float originX = 0.0f, float originY = 0.0f, bool hideHorizontal = false)
+{
+	Point<int> center = view.GetScreenCoords(originX, originY);
+	if (0 <= center.x && center.x < 400) {
+		sf2d_draw_rectangle(center.x, 0, 1, 240, color);
+	}
+	if (!hideHorizontal && 0 <= center.y && center.y < 240) {
+		sf2d_draw_rectangle(0, center.y, 399, 1, color);
+	}
+}
 
 void drawGraph(const ViewWindow &view, u32 color)
 {
 	Point<int> lastPoint;
 	bool ignoreLastPoint = true;
 	
-	for (int x=0; x<400; x+=2) {
+	for (int x=0; x<400; x++) {
 		Point<int> pt;
 		exprX = Interpolate((float)x, 0.0f, 399.0f, view.xmin, view.xmax);
 		float y;
@@ -49,6 +62,9 @@ void drawGraph(const ViewWindow &view, u32 color)
 
 int main(int argc, char *argv[])
 {
+	float cursorX = 200.0f, cursorY = 120.0f;
+	bool traceUndefined = false;
+	
 	ViewWindow view(-5.0f, 5.0f, -3.0f, 3.0f);
 	
 	equation.push_back(1.25f);
@@ -90,15 +106,53 @@ int main(int argc, char *argv[])
 			view.ZoomIn(1.02f);
 		}
 		
+		if (keys & KEY_SELECT) {
+			view = ViewWindow(-5.0f, 5.0f, -3.0f, 3.0f);
+		}
+		
 		circlePosition circle;
 		hidCircleRead(&circle);
 		
 		if (circle.dx * circle.dx + circle.dy * circle.dy > 15*15) {
-			view.Pan(0.002f * circle.dx, 0.002f * circle.dy);
+			if (keys & (KEY_X | KEY_Y)) {
+				cursorX += 0.05f * circle.dx;
+				cursorY -= 0.05f * circle.dy;
+				if (cursorX < 0.0f)
+					cursorX = 0.0f;
+				else if (cursorX > 399.0f)
+					cursorX = 399.0f;
+				if (cursorY < 0.0f)
+					cursorY = 0.0f;
+				else if (cursorY > 239.0f) {
+					cursorY = 239.0f;
+				}
+			} else {
+				float rangeX = view.xmax - view.xmin;
+				float rangeY = view.ymax - view.ymin;
+				view.Pan(0.0002f * rangeX * circle.dx, 0.0002f * rangeY * circle.dy);
+			}
 		}
 		
 		sf2d_start_frame(GFX_TOP, GFX_LEFT);
+		sf2d_draw_rectangle(0, 0, 400, 240, RGBA8(0xFF, 0xFF, 0xFF, 0xFF));
+		drawAxes(view, RGBA8(0x80, 0xFF, 0xFF, 0xFF));
 		drawGraph(view, RGBA8(0x00, 0x00, 0xC0, 0xFF));
+		
+		if (keys & (KEY_X | KEY_Y)) {
+			Point<float> cursor = view.GetGraphCoords(cursorX, cursorY);
+			if (keys & KEY_Y) {
+				exprX = cursor.x;
+				RpnInstruction::Status status = ExecuteRpn(equation, cursor.y);
+				traceUndefined = (status != RpnInstruction::S_OK);
+			} else {
+				traceUndefined = false;
+			}
+			u32 color = (keys & KEY_Y) ? RGBA8(0xFF, 0x00, 0x00, 0xFF) : RGBA8(0x00, 0xC0, 0x00, 0xFF);
+			drawAxes(view, color, cursor.x, cursor.y, traceUndefined);
+			sftd_draw_textf(font, 2, 0, color, 18, "X = %.5f", cursor.x);
+			sftd_draw_textf(font, 2, 22, color, 18, "Y = %.5f", cursor.y);
+		}
+		
 		sf2d_end_frame();
 		
 		sf2d_start_frame(GFX_BOTTOM, GFX_LEFT);
@@ -129,9 +183,19 @@ int main(int argc, char *argv[])
 void UpdateEquationDisplay()
 {
 	std::ostringstream ss;
-	for (auto i = equation.begin(); i != equation.end(); ++i) {
-		ss << *i << ' ';
+	auto count = equation.size();
+	if (numpad.EntryInProgress()) --count;
+	
+	for (decltype(count) i=0; i<count; i++) {
+		ss << equation[i] << ' ';
 	}
+	
+	if (numpad.EntryInProgress()) {
+		std::string entry;
+		numpad.GetEntryString(entry);
+		ss << entry;
+	}
+	
 	equDisp->SetText(ss.str());
 }
 
@@ -170,27 +234,53 @@ void SetUpControlGrid(cgrid_t &cgrid)
 		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_ADD, RpnInstruction(&exprX, "x"), RpnInstruction::OP_NULL, RpnInstruction::OP_NULL }
 	};
 	
+	const char *numpadKeys[] = { "789", "456", "123", "0.-" };
+	
 	for (int r=0; r<5; r++) {
 		for (int c=0; c<7; c++) {
 			if (btnText[r][c] != nullptr) {
 				Button *btn = new Button(btnText[r][c], btnColors[r][c]);
 				RpnInstruction::Opcode opcode = btnInstructions[r][c].GetOpcode();
 				
-				if (r == 0 && c == 6) {
-					btn->SetAction([](Button&) {
-						if (equation.size() > 0) {
-							equation.pop_back();
-							UpdateEquationDisplay();
-						}
-					});
-				} else if (r == 4 && c == 5) {
+				if (r == 4 && c == 5) {
 					btn->SetAction([](Button&) {
 						equation.clear();
+						numpad.Reset();
+						UpdateEquationDisplay();
+					});
+				} else if ((r > 0 && c < 3) || (r == 0 && c == 6)) {
+					char key;
+					if (r == 0) { //&& c == 6, always the case if r == 0
+						key = '\b';
+					} else {
+						key = numpadKeys[r-1][c];
+					}
+					btn->SetAction([key](Button&) {
+						if (key == '\b' && !numpad.EntryInProgress()) {
+							if (equation.size() > 0) {
+								equation.pop_back();
+							}
+						} else {
+							const RpnInstruction *lastInst = nullptr;
+							if (equation.size() > 0) {
+								lastInst = &equation.back();
+							}
+							NumpadController::Reply reply = numpad.KeyPressed(key, lastInst);
+							if (reply.replaceLast) {
+								equation.back() = reply.inst;
+							} else {
+								equation.push_back(reply.inst);
+							}
+						}
 						UpdateEquationDisplay();
 					});
 				} else if (opcode != RpnInstruction::OP_NULL) {
-					btn->SetAction([opcode](Button&) {
-						equation.push_back(opcode);
+					RpnInstruction inst = btnInstructions[r][c];
+					btn->SetAction([inst](Button&) {
+						if (numpad.EntryInProgress()) {
+							numpad.Reset();
+						}
+						equation.push_back(inst);
 						UpdateEquationDisplay();
 					});
 				}

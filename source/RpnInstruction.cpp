@@ -1,6 +1,11 @@
 #include "RpnInstruction.h"
 #include <cmath>
 
+RpnInstruction::RpnInstruction()
+{
+	op = OP_NULL;
+}
+
 RpnInstruction::RpnInstruction(Opcode opcode)
 {
 	op = opcode;
@@ -44,9 +49,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float x = stack.back();
-				stack.pop_back();
 				float y = stack.back();
+				stack.pop_back();
+				float x = stack.back();
 				stack.pop_back();
 				stack.push_back(x + y);
 				return S_OK;
@@ -55,9 +60,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float x = stack.back();
-				stack.pop_back();
 				float y = stack.back();
+				stack.pop_back();
+				float x = stack.back();
 				stack.pop_back();
 				stack.push_back(x - y);
 				return S_OK;
@@ -66,9 +71,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float x = stack.back();
-				stack.pop_back();
 				float y = stack.back();
+				stack.pop_back();
+				float x = stack.back();
 				stack.pop_back();
 				stack.push_back(x * y);
 				return S_OK;
@@ -77,9 +82,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float x = stack.back();
-				stack.pop_back();
 				float y = stack.back();
+				stack.pop_back();
+				float x = stack.back();
 				stack.pop_back();
 				if (y == 0) {
 					return S_UNDEFINED;
@@ -92,9 +97,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float x = stack.back();
-				stack.pop_back();
 				float y = stack.back();
+				stack.pop_back();
+				float x = stack.back();
 				stack.pop_back();
 				if (y == 0) {
 					return S_UNDEFINED;
@@ -107,9 +112,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float x = stack.back();
-				stack.pop_back();
 				float y = stack.back();
+				stack.pop_back();
+				float x = stack.back();
 				stack.pop_back();
 				stack.push_back(std::pow(x, y));
 				return S_OK;

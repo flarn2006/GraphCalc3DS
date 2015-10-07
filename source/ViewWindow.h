@@ -3,10 +3,10 @@
 
 class ViewWindow
 {
-	const float sxmin = 0.0f;
-	const float sxmax = 399.0f;
-	const float symin = 239.0f;
-	const float symax = 0.0f;
+	static constexpr float sxmin = 0.0f;
+	static constexpr float sxmax = 399.0f;
+	static constexpr float symin = 239.0f;
+	static constexpr float symax = 0.0f;
 	
 public:
 	float xmin, xmax;

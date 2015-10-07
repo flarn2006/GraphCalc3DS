@@ -45,6 +45,7 @@ private:
 	};
 	
 public:
+	RpnInstruction();
 	RpnInstruction(Opcode opcode);
 	RpnInstruction(float value);
 	RpnInstruction(float *var, const char *name);

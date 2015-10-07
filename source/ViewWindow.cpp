@@ -42,16 +42,15 @@ void ViewWindow::Pan(float x, float y)
 
 void ViewWindow::ZoomIn(float factor)
 {
-	xmin /= factor;
-	xmax /= factor;
-	ymin /= factor;
-	ymax /= factor;
+	ZoomOut(1.0f / factor);
 }
 
 void ViewWindow::ZoomOut(float factor)
 {
-	xmin *= factor;
-	xmax *= factor;
-	ymin *= factor;
-	ymax *= factor;
+	float centerX = (xmin + xmax) / 2;
+	float centerY = (ymin + ymax) / 2;
+	xmin = Interpolate(factor, 1.0f, 0.0f, xmin, centerX);
+	xmax = Interpolate(factor, 1.0f, 0.0f, xmax, centerX);
+	ymin = Interpolate(factor, 1.0f, 0.0f, ymin, centerY);
+	ymax = Interpolate(factor, 1.0f, 0.0f, ymax, centerY);
 }
