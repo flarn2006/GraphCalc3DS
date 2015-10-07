@@ -24,16 +24,28 @@ RpnInstruction::RpnInstruction(float *var, const char *name)
 	this->name = name;
 }
 
-RpnInstruction::RpnInstruction(func_t func, const char *name)
+RpnInstruction::RpnInstruction(func_t func, const char *name, int domain)
 {
 	op = OP_FUNCTION;
 	this->func = func;
 	this->name = name;
+	this->domain = domain;
 }
 
 RpnInstruction::Opcode RpnInstruction::GetOpcode() const
 {
 	return op;
+}
+
+bool RpnInstruction::IsInDomain(float value) const
+{
+	if (value > 0)
+		return domain & D_POSITIVE;
+	if (value < 0)
+		return domain & D_NEGATIVE;
+	if (value == 0)
+		return domain & D_ZERO;
+	return false; //Shouldn't happen in practice, but I don't think it's logically impossible. NaN maybe?
 }
 
 RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
@@ -132,8 +144,12 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 				return S_UNDERFLOW;
 			} else {
 				float &back = stack.back();
-				back = func(back);
-				return S_OK;
+				if (IsInDomain(back)) {
+					back = func(back);
+					return S_OK;
+				} else {
+					return S_UNDEFINED;
+				}
 			}
 		default:
 			return S_UNDEFINED;

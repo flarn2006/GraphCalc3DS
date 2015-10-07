@@ -7,6 +7,7 @@ Requires [sf2dlib](https://github.com/xerpi/sf2dlib) and [sftdlib](https://githu
 ## Controls
 
 * **Circle pad:** Pan view, move cursor
+* **L / R:** Zoom
 * **X:** Hold for free cursor
 * **Y:** Hold to trace graph
 * **Select (![deIlluminati](https://static-cdn.jtvnw.net/emoticons/v1/46248/1.0)):** Reset view

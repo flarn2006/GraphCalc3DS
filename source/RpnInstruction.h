@@ -29,6 +29,13 @@ public:
 		S_UNDEFINED
 	};
 	
+	enum {
+		D_ZERO = 1,
+		D_POSITIVE = 2,
+		D_NEGATIVE = 4,
+		D_ALL = D_ZERO | D_POSITIVE | D_NEGATIVE
+	};
+	
 	typedef float (*func_t)(float);
 	
 private:
@@ -38,18 +45,23 @@ private:
 		struct {
 			union {
 				float *var;
-				func_t func;
+				struct {
+					func_t func;
+					int domain;
+				};
 			};
 			const char *name;
 		};
-	};
+	}; // Yes, I know that was complex. :)
+	
+	bool IsInDomain(float value) const;
 	
 public:
 	RpnInstruction();
 	RpnInstruction(Opcode opcode);
 	RpnInstruction(float value);
 	RpnInstruction(float *var, const char *name);
-	RpnInstruction(func_t func, const char *name);
+	RpnInstruction(func_t func, const char *name, int domain = D_ALL);
 	
 	Opcode GetOpcode() const;
 	Status Execute(std::vector<float> &stack) const;
