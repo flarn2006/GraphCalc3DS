@@ -150,7 +150,8 @@ int main(int argc, char *argv[])
 			u32 color = (keys & KEY_Y) ? RGBA8(0xFF, 0x00, 0x00, 0xFF) : RGBA8(0x00, 0xC0, 0x00, 0xFF);
 			drawAxes(view, color, cursor.x, cursor.y, traceUndefined);
 			sftd_draw_textf(font, 2, 0, color, 18, "X = %.5f", cursor.x);
-			sftd_draw_textf(font, 2, 22, color, 18, "Y = %.5f", cursor.y);
+			if (!traceUndefined)
+				sftd_draw_textf(font, 2, 22, color, 18, "Y = %.5f", cursor.y);
 		}
 		
 		sf2d_end_frame();
