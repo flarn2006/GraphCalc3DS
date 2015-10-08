@@ -17,9 +17,10 @@ float exprX;
 sftd_font *font;
 TextDisplay *equDisp;
 NumpadController numpad;
+std::vector<ControlGridBase*> controlGrids;
+int cgridIndex = 0;
 
-typedef ControlGrid<5, 7> cgrid_t;
-void SetUpControlGrid(cgrid_t &cgrid);
+void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid);
 
 void drawAxes(const ViewWindow &view, u32 color, float originX = 0.0f, float originY = 0.0f, bool hideHorizontal = false)
 {
@@ -74,9 +75,17 @@ int main(int argc, char *argv[])
 	equation.push_back(RpnInstruction(std::cos, "cos"));
 	equation.push_back(RpnInstruction::OP_MULTIPLY);
 	
-	cgrid_t cgrid(45, 48);
-	cgrid.SetDrawOffset(2, 0);
-	SetUpControlGrid(cgrid);
+	ControlGrid<5, 7> cgridMain(45, 48);
+	cgridMain.SetDrawOffset(2, 0);
+	SetUpMainControlGrid(cgridMain);
+	controlGrids.push_back(&cgridMain);
+	
+	ControlGrid<2, 2> cgridTest(160, 120);
+	cgridTest.cells[0][0].content = new Button("Test", Button::C_BLUE);
+	cgridTest.cells[0][1].content = new Button("Screen", Button::C_GREEN);
+	cgridTest.cells[1][0].content = new Button("Please", Button::C_PINK);
+	cgridTest.cells[1][1].content = new Button("Ignore", Button::C_ORANGE);
+	controlGrids.push_back(&cgridTest);
 	
 	sf2d_init();
 	sf2d_set_clear_color(RGBA8(0xE0, 0xE0, 0xE0, 0xFF));
@@ -88,6 +97,7 @@ int main(int argc, char *argv[])
 	while (aptMainLoop()) {
 		hidScanInput();
 		int keys = hidKeysHeld();
+		int down = hidKeysDown();
 		
 		touchPosition touch;
 		if (keys & KEY_TOUCH) {
@@ -108,6 +118,18 @@ int main(int argc, char *argv[])
 		
 		if (keys & KEY_SELECT) {
 			view = ViewWindow(-5.0f, 5.0f, -3.0f, 3.0f);
+		}
+		
+		if (down & (KEY_DLEFT | KEY_DRIGHT) && !(keys & KEY_TOUCH)) {
+			if (down & KEY_DLEFT) --cgridIndex;
+			if (down & KEY_DRIGHT) ++cgridIndex;
+			
+			int count = controlGrids.size();
+			if (cgridIndex < 0)
+				cgridIndex = count - 1;
+			else if (cgridIndex >= count) {
+				cgridIndex = 0;
+			}
 		}
 		
 		circlePosition circle;
@@ -157,20 +179,11 @@ int main(int argc, char *argv[])
 		sf2d_end_frame();
 		
 		sf2d_start_frame(GFX_BOTTOM, GFX_LEFT);
-		cgrid.ScreenTouchStatus(keys & KEY_TOUCH, touch.px, touch.py);
-		cgrid.Draw();
+		controlGrids[cgridIndex]->ScreenTouchStatus(keys & KEY_TOUCH, touch.px, touch.py);
+		controlGrids[cgridIndex]->Draw();
 		sf2d_end_frame();
 		
 		sf2d_swapbuffers();
-	}
-	
-	for (int r=0; r<5; r++) {
-		for (int c=0; c<7; c++) {
-			Control *ctl = cgrid.cells[r][c].content;
-			if (ctl != nullptr) {
-				delete ctl;
-			}
-		}
 	}
 	
 	romfsExit();
@@ -200,7 +213,7 @@ void UpdateEquationDisplay()
 	equDisp->SetText(ss.str());
 }
 
-void SetUpControlGrid(cgrid_t &cgrid)
+void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 {
 	equDisp = new TextDisplay();
 	cgrid.cells[0][0].content = equDisp;

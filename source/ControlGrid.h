@@ -2,12 +2,22 @@
 #include "TableLayout.h"
 #include "Control.h"
 
+class ControlGridBase
+{
+protected:
+	int offsetX = 0, offsetY = 0;
+	
+public:
+	void SetDrawOffset(int x, int y);
+	virtual void Draw() = 0;
+	virtual void ScreenTouchStatus(bool touching, int x, int y) = 0;
+};
+
 template <int _Rows, int _Cols>
-class ControlGrid : public TableLayout<Control*, _Rows, _Cols>
+class ControlGrid : public TableLayout<Control*, _Rows, _Cols>, public ControlGridBase
 {
 	TableCell<Control*> *activeCell = nullptr;
 	bool wasTouchingBefore = false;
-	int offsetX = 0, offsetY = 0;
 	
 private:
 	void Initialize()
