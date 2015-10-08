@@ -131,6 +131,8 @@ int main(int argc, char *argv[])
 		}
 		
 		if (down & (KEY_DUP | KEY_DDOWN)) {
+			numpad.Reset();
+			
 			if (down & KEY_DUP) --plotIndex;
 			if (down & KEY_DDOWN) ++plotIndex;
 			
