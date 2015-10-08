@@ -12,14 +12,20 @@
 #include "TextDisplay.h"
 #include "NumpadController.h"
 
-std::vector<RpnInstruction> equation;
+constexpr int plotCount = 4;
+
+std::vector<RpnInstruction> equations[plotCount];
 float exprX;
 sftd_font *font;
 TextDisplay *equDisp;
 NumpadController numpad;
 std::vector<ControlGridBase*> controlGrids;
 int cgridIndex = 0;
+int plotIndex = 0;
 
+const int plotColors[] = { RGBA8(0x00, 0x00, 0xC0, 0xFF), RGBA8(0x00, 0x80, 0x00, 0xFF), RGBA8(0xD5, 0x00, 0xDD, 0xFF), RGBA8(0xD2, 0x94, 0x00, 0xFF) };
+
+void UpdateEquationDisplay();
 void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid);
 
 void drawAxes(const ViewWindow &view, u32 color, float originX = 0.0f, float originY = 0.0f, bool hideHorizontal = false)
@@ -33,7 +39,7 @@ void drawAxes(const ViewWindow &view, u32 color, float originX = 0.0f, float ori
 	}
 }
 
-void drawGraph(const ViewWindow &view, u32 color)
+void drawGraph(const std::vector<RpnInstruction> &equation, const ViewWindow &view, u32 color, bool showErrors = true)
 {
 	Point<int> lastPoint;
 	bool ignoreLastPoint = true;
@@ -48,10 +54,14 @@ void drawGraph(const ViewWindow &view, u32 color)
 		if (status == RpnInstruction::S_OK && !ignoreLastPoint) {
 			sf2d_draw_line(lastPoint.x, lastPoint.y, pt.x, pt.y, color);
 		} else if (status == RpnInstruction::S_OVERFLOW) {
-			sftd_draw_text(font, 4, 4, color, 20, "Error: Stack overflow");
+			if (showErrors) {
+				sftd_draw_text(font, 4, 4, color, 20, "Error: Stack overflow");
+			}
 			break;
 		} else if (status == RpnInstruction::S_UNDERFLOW) {
-			sftd_draw_text(font, 4, 4, color, 20, "Error: Stack underflow");
+			if (showErrors) {
+				sftd_draw_text(font, 4, 4, color, 20, "Error: Stack underflow");
+			}
 			break;
 		} else {
 			ignoreLastPoint = (status == RpnInstruction::S_UNDEFINED);
@@ -68,12 +78,12 @@ int main(int argc, char *argv[])
 	
 	ViewWindow view(-5.0f, 5.0f, -3.0f, 3.0f);
 	
-	equation.push_back(1.25f);
-	equation.push_back(RpnInstruction(&exprX, "x"));
-	equation.push_back(RpnInstruction::OP_MULTIPLY);
-	equation.push_back(RpnInstruction(&exprX, "x"));
-	equation.push_back(RpnInstruction(std::cos, "cos"));
-	equation.push_back(RpnInstruction::OP_MULTIPLY);
+	equations[0].push_back(1.25f);
+	equations[0].push_back(RpnInstruction(&exprX, "x"));
+	equations[0].push_back(RpnInstruction::OP_MULTIPLY);
+	equations[0].push_back(RpnInstruction(&exprX, "x"));
+	equations[0].push_back(RpnInstruction(std::cos, "cos"));
+	equations[0].push_back(RpnInstruction::OP_MULTIPLY);
 	
 	ControlGrid<5, 7> cgridMain(45, 48);
 	cgridMain.SetDrawOffset(2, 0);
@@ -120,6 +130,18 @@ int main(int argc, char *argv[])
 			view = ViewWindow(-5.0f, 5.0f, -3.0f, 3.0f);
 		}
 		
+		if (down & (KEY_DUP | KEY_DDOWN)) {
+			if (down & KEY_DUP) --plotIndex;
+			if (down & KEY_DDOWN) ++plotIndex;
+			
+			if (plotIndex < 0)
+				plotIndex = plotCount - 1;
+			else if (plotIndex >= plotCount)
+				plotIndex = 0;
+			
+			UpdateEquationDisplay();
+		}
+		
 		if (down & (KEY_DLEFT | KEY_DRIGHT) && !(keys & KEY_TOUCH)) {
 			if (down & KEY_DLEFT) --cgridIndex;
 			if (down & KEY_DRIGHT) ++cgridIndex;
@@ -158,13 +180,16 @@ int main(int argc, char *argv[])
 		sf2d_start_frame(GFX_TOP, GFX_LEFT);
 		sf2d_draw_rectangle(0, 0, 400, 240, RGBA8(0xFF, 0xFF, 0xFF, 0xFF));
 		drawAxes(view, RGBA8(0x80, 0xFF, 0xFF, 0xFF));
-		drawGraph(view, RGBA8(0x00, 0x00, 0xC0, 0xFF));
+		
+		for (int i=0; i<plotCount; i++) {
+			drawGraph(equations[i], view, plotColors[i], i == plotIndex);
+		}
 		
 		if (keys & (KEY_X | KEY_Y)) {
 			Point<float> cursor = view.GetGraphCoords(cursorX, cursorY);
 			if (keys & KEY_Y) {
 				exprX = cursor.x;
-				RpnInstruction::Status status = ExecuteRpn(equation, cursor.y);
+				RpnInstruction::Status status = ExecuteRpn(equations[plotIndex], cursor.y);
 				traceUndefined = (status != RpnInstruction::S_OK);
 			} else {
 				traceUndefined = false;
@@ -197,11 +222,11 @@ int main(int argc, char *argv[])
 void UpdateEquationDisplay()
 {
 	std::ostringstream ss;
-	auto count = equation.size();
+	auto count = equations[plotIndex].size();
 	if (numpad.EntryInProgress()) --count;
 	
 	for (decltype(count) i=0; i<count; i++) {
-		ss << equation[i] << ' ';
+		ss << equations[plotIndex][i] << ' ';
 	}
 	
 	if (numpad.EntryInProgress()) {
@@ -211,6 +236,7 @@ void UpdateEquationDisplay()
 	}
 	
 	equDisp->SetText(ss.str());
+	equDisp->SetTextColor(plotColors[plotIndex]);
 }
 
 void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
@@ -258,7 +284,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 				
 				if (r == 4 && c == 5) {
 					btn->SetAction([](Button&) {
-						equation.clear();
+						equations[plotIndex].clear();
 						numpad.Reset();
 						UpdateEquationDisplay();
 					});
@@ -271,19 +297,19 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 					}
 					btn->SetAction([key](Button&) {
 						if (key == '\b' && !numpad.EntryInProgress()) {
-							if (equation.size() > 0) {
-								equation.pop_back();
+							if (equations[plotIndex].size() > 0) {
+								equations[plotIndex].pop_back();
 							}
 						} else {
 							const RpnInstruction *lastInst = nullptr;
-							if (equation.size() > 0) {
-								lastInst = &equation.back();
+							if (equations[plotIndex].size() > 0) {
+								lastInst = &equations[plotIndex].back();
 							}
 							NumpadController::Reply reply = numpad.KeyPressed(key, lastInst);
 							if (reply.replaceLast) {
-								equation.back() = reply.inst;
+								equations[plotIndex].back() = reply.inst;
 							} else {
-								equation.push_back(reply.inst);
+								equations[plotIndex].push_back(reply.inst);
 							}
 						}
 						UpdateEquationDisplay();
@@ -294,7 +320,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 						if (numpad.EntryInProgress()) {
 							numpad.Reset();
 						}
-						equation.push_back(inst);
+						equations[plotIndex].push_back(inst);
 						UpdateEquationDisplay();
 					});
 				}
