@@ -71,6 +71,21 @@ void drawGraph(const std::vector<RpnInstruction> &equation, const ViewWindow &vi
 	}
 }
 
+void moveCursor(float &cursorX, float &cursorY, float dx, float dy)
+{
+	cursorX += dx;
+	if (cursorX < 0.0f)
+		cursorX = 0.0f;
+	else if (cursorX > 399.0f)
+		cursorY = 399.0f;
+	
+	cursorY += dy;
+	if (cursorY < 0.0f)
+		cursorY = 0.0f;
+	else if (cursorY > 239.0f)
+		cursorY = 239.0f;
+}
+
 int main(int argc, char *argv[])
 {
 	float cursorX = 200.0f, cursorY = 120.0f;
@@ -131,28 +146,38 @@ int main(int argc, char *argv[])
 		}
 		
 		if (down & (KEY_DUP | KEY_DDOWN)) {
-			numpad.Reset();
-			
-			if (down & KEY_DUP) --plotIndex;
-			if (down & KEY_DDOWN) ++plotIndex;
-			
-			if (plotIndex < 0)
-				plotIndex = plotCount - 1;
-			else if (plotIndex >= plotCount)
-				plotIndex = 0;
-			
-			UpdateEquationDisplay();
+			if (keys & KEY_X) {
+				if (down & KEY_DUP) moveCursor(cursorX, cursorY, 0.0f, -1.0f);
+				if (down & KEY_DDOWN) moveCursor(cursorX, cursorY, 0.0f, 1.0f);
+			} else {
+				numpad.Reset();
+				
+				if (down & KEY_DUP) --plotIndex;
+				if (down & KEY_DDOWN) ++plotIndex;
+				
+				if (plotIndex < 0)
+					plotIndex = plotCount - 1;
+				else if (plotIndex >= plotCount)
+					plotIndex = 0;
+				
+				UpdateEquationDisplay();
+			}
 		}
 		
-		if (down & (KEY_DLEFT | KEY_DRIGHT) && !(keys & KEY_TOUCH)) {
-			if (down & KEY_DLEFT) --cgridIndex;
-			if (down & KEY_DRIGHT) ++cgridIndex;
+		if (down & (KEY_DLEFT | KEY_DRIGHT)) {
+			if (keys & (KEY_X | KEY_Y)) {
+				if (down & KEY_DLEFT) moveCursor(cursorX, cursorY, -1.0f, 0.0f);
+				if (down & KEY_DRIGHT) moveCursor(cursorX, cursorY, 1.0f, 0.0f);
+			} else if (!(keys & KEY_TOUCH)) {
+				if (down & KEY_DLEFT) --cgridIndex;
+				if (down & KEY_DRIGHT) ++cgridIndex;
 			
-			int count = controlGrids.size();
-			if (cgridIndex < 0)
-				cgridIndex = count - 1;
-			else if (cgridIndex >= count) {
-				cgridIndex = 0;
+				int count = controlGrids.size();
+				if (cgridIndex < 0)
+					cgridIndex = count - 1;
+				else if (cgridIndex >= count) {
+					cgridIndex = 0;
+				}
 			}
 		}
 		
@@ -161,17 +186,7 @@ int main(int argc, char *argv[])
 		
 		if (circle.dx * circle.dx + circle.dy * circle.dy > 15*15) {
 			if (keys & (KEY_X | KEY_Y)) {
-				cursorX += 0.05f * circle.dx;
-				cursorY -= 0.05f * circle.dy;
-				if (cursorX < 0.0f)
-					cursorX = 0.0f;
-				else if (cursorX > 399.0f)
-					cursorX = 399.0f;
-				if (cursorY < 0.0f)
-					cursorY = 0.0f;
-				else if (cursorY > 239.0f) {
-					cursorY = 239.0f;
-				}
+				moveCursor(cursorX, cursorY, 0.05f * circle.dx, -0.05f * circle.dy);
 			} else {
 				float rangeX = view.xmax - view.xmin;
 				float rangeY = view.ymax - view.ymin;
