@@ -105,13 +105,6 @@ int main(int argc, char *argv[])
 	SetUpMainControlGrid(cgridMain);
 	controlGrids.push_back(&cgridMain);
 	
-	ControlGrid<2, 2> cgridTest(160, 120);
-	cgridTest.cells[0][0].content = new Button("Test", Button::C_BLUE);
-	cgridTest.cells[0][1].content = new Button("Screen", Button::C_GREEN);
-	cgridTest.cells[1][0].content = new Button("Please", Button::C_PINK);
-	cgridTest.cells[1][1].content = new Button("Ignore", Button::C_ORANGE);
-	controlGrids.push_back(&cgridTest);
-	
 	sf2d_init();
 	sf2d_set_clear_color(RGBA8(0xE0, 0xE0, 0xE0, 0xFF));
 	
