@@ -77,7 +77,7 @@ void moveCursor(float &cursorX, float &cursorY, float dx, float dy)
 	if (cursorX < 0.0f)
 		cursorX = 0.0f;
 	else if (cursorX > 399.0f)
-		cursorY = 399.0f;
+		cursorX = 399.0f;
 	
 	cursorY += dy;
 	if (cursorY < 0.0f)
