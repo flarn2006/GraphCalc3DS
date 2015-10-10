@@ -89,6 +89,7 @@ void moveCursor(float &cursorX, float &cursorY, float dx, float dy)
 int main(int argc, char *argv[])
 {
 	float cursorX = 200.0f, cursorY = 120.0f;
+	float traceUnit = 0;
 	bool traceUndefined = false;
 	
 	ViewWindow view(-5.0f, 5.0f, -3.0f, 3.0f);
@@ -198,6 +199,10 @@ int main(int argc, char *argv[])
 		if (keys & (KEY_X | KEY_Y)) {
 			Point<float> cursor = view.GetGraphCoords(cursorX, cursorY);
 			if (keys & KEY_Y) {
+				if (keys & KEY_B) {
+					traceUnit = std::pow(10.0f, std::ceil(std::log10((view.xmax - view.xmin) / 400)));
+					cursor.x = std::round(cursor.x / traceUnit) * traceUnit;
+				}
 				exprX = cursor.x;
 				RpnInstruction::Status status = ExecuteRpn(equations[plotIndex], cursor.y);
 				traceUndefined = (status != RpnInstruction::S_OK);
