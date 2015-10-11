@@ -17,7 +17,7 @@ RpnInstruction::RpnInstruction(float value)
 	this->value = value;
 }
 
-RpnInstruction::RpnInstruction(float *var, const char *name)
+RpnInstruction::RpnInstruction(const float *var, const char *name)
 {
 	op = OP_PUSHVAR;
 	this->var = var;

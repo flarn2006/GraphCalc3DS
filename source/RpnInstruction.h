@@ -44,7 +44,7 @@ private:
 		float value;
 		struct {
 			union {
-				float *var;
+				const float *var;
 				struct {
 					func_t func;
 					int domain;
@@ -60,7 +60,7 @@ public:
 	RpnInstruction();
 	RpnInstruction(Opcode opcode);
 	RpnInstruction(float value);
-	RpnInstruction(float *var, const char *name);
+	RpnInstruction(const float *var, const char *name);
 	RpnInstruction(func_t func, const char *name, int domain = D_ALL);
 	
 	Opcode GetOpcode() const;
