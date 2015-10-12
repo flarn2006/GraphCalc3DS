@@ -20,6 +20,13 @@ Slider::Slider(float min, float max)
 	this->max = max;
 }
 
+void Slider::TouchingAnywhere(int x, int y)
+{
+	value = Interpolate((float)x, 1.0f, (float)(width - 2), min, max);
+	if (value < min) value = min;
+	else if (value > max) value = max;
+}
+
 void Slider::Draw(int x, int y, int w, int h)
 {
 	width = w;
@@ -31,7 +38,14 @@ void Slider::Draw(int x, int y, int w, int h)
 
 void Slider::TouchingInside(int x, int y)
 {
-	value = Interpolate((float)x, 0.0f, (float)width, min, max);
+	Control::TouchingInside(x, y);
+	TouchingAnywhere(x, y);
+}
+
+void Slider::TouchingOutside(int x, int y)
+{
+	Control::TouchingOutside(x, y);
+	TouchingAnywhere(x, y);
 }
 
 void Slider::SetRange(float min, float max)

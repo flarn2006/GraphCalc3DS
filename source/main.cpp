@@ -89,6 +89,15 @@ void moveCursor(float &cursorX, float &cursorY, float dx, float dy)
 		cursorY = 239.0f;
 }
 
+void addInstruction(const RpnInstruction &inst)
+{
+	if (numpad.EntryInProgress()) {
+		numpad.Reset();
+	}
+	equations[plotIndex].push_back(inst);
+	UpdateEquationDisplay();
+}
+
 int main(int argc, char *argv[])
 {
 	float cursorX = 200.0f, cursorY = 120.0f;
@@ -340,11 +349,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 				} else if (opcode != RpnInstruction::OP_NULL) {
 					RpnInstruction inst = btnInstructions[r][c];
 					btn->SetAction([inst](Button&) {
-						if (numpad.EntryInProgress()) {
-							numpad.Reset();
-						}
-						equations[plotIndex].push_back(inst);
-						UpdateEquationDisplay();
+						addInstruction(inst);
 					});
 				}
 				
@@ -368,13 +373,12 @@ void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid)
 	for (int i=0; i<4; i++) {
 		Slider *slider = new Slider();
 		cgrid.cells[i+1][1] = slider;
-		cgrid.cells[i+1][1].colSpan = 6;
+		cgrid.cells[i+1][1].colSpan = 5;
 		
 		char varName[2] = {(char)('a' + i), '\0'};
 		Button *btn = new Button(varName, Button::C_BLUE);
 		btn->SetAction([slider, varName](Button&) {
-			equations[plotIndex].push_back(RpnInstruction(&slider->value, varName));
-			UpdateEquationDisplay();
+			addInstruction(RpnInstruction(&slider->value, varName));
 		});
 		cgrid.cells[i+1][0].content = btn;
 	}

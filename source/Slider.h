@@ -6,6 +6,8 @@ class Slider : public Control
 	float min, max;
 	int width;
 	
+	void TouchingAnywhere(int x, int y);
+	
 public:
 	float value;
 	
@@ -14,6 +16,7 @@ public:
 	
 	virtual void Draw(int x, int y, int w, int h);
 	virtual void TouchingInside(int x, int y);
+	virtual void TouchingOutside(int x, int y);
 	
 	void SetRange(float min, float max);
 	float GetMinimum() const;
