@@ -10,7 +10,7 @@ Requires [sf2dlib](https://github.com/xerpi/sf2dlib) and [sftdlib](https://githu
 * **L / R:** Zoom
 * **Up / Down:** Change active plot (for equation editing/trace cursor)
 * **X:** Hold for free cursor
-* **Y:** Hold to trace graph
+* **Y:** Hold to trace graph (hold **B** to snap to units)
 * **Select (![deIlluminati](https://static-cdn.jtvnw.net/emoticons/v1/46248/1.0)):** Reset view
 * **Start:** Quit
 
