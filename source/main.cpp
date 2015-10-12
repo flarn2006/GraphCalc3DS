@@ -11,6 +11,7 @@
 #include "Button.h"
 #include "TextDisplay.h"
 #include "NumpadController.h"
+#include "Slider.h"
 
 constexpr int plotCount = 4;
 
@@ -105,6 +106,11 @@ int main(int argc, char *argv[])
 	cgridMain.SetDrawOffset(2, 0);
 	SetUpMainControlGrid(cgridMain);
 	controlGrids.push_back(&cgridMain);
+	
+	ControlGrid<2, 1> cgridTest(320, 120);
+	cgridTest.cells[0][0].content = new Slider();
+	cgridTest.cells[1][0].content = new Slider(-10.0f, 25.0f);
+	controlGrids.push_back(&cgridTest);
 	
 	sf2d_init();
 	sf2d_set_clear_color(RGBA8(0xE0, 0xE0, 0xE0, 0xFF));
