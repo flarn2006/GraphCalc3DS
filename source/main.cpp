@@ -19,6 +19,7 @@ std::vector<RpnInstruction> equations[plotCount];
 float exprX;
 sftd_font *font;
 TextDisplay *equDisp;
+Control *btnBackspace;
 NumpadController numpad;
 std::vector<ControlGridBase*> controlGrids;
 int cgridIndex = 0;
@@ -28,6 +29,7 @@ const int plotColors[] = { RGBA8(0x00, 0x00, 0xC0, 0xFF), RGBA8(0x00, 0x80, 0x00
 
 void UpdateEquationDisplay();
 void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid);
+void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid);
 
 void drawAxes(const ViewWindow &view, u32 color, float originX = 0.0f, float originY = 0.0f, bool hideHorizontal = false)
 {
@@ -107,10 +109,10 @@ int main(int argc, char *argv[])
 	SetUpMainControlGrid(cgridMain);
 	controlGrids.push_back(&cgridMain);
 	
-	ControlGrid<2, 1> cgridTest(320, 120);
-	cgridTest.cells[0][0].content = new Slider();
-	cgridTest.cells[1][0].content = new Slider(-10.0f, 25.0f);
-	controlGrids.push_back(&cgridTest);
+	ControlGrid<5, 7> cgridVars(45, 48);
+	cgridVars.SetDrawOffset(2, 0);
+	SetUpVarsControlGrid(cgridVars);
+	controlGrids.push_back(&cgridVars);
 	
 	sf2d_init();
 	sf2d_set_clear_color(RGBA8(0xE0, 0xE0, 0xE0, 0xFF));
@@ -351,6 +353,29 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 		}
 	}
 	
+	btnBackspace = cgrid.cells[0][6].content;
+	
 	cgrid.cells[0][0].colSpan = 6;
 	cgrid.cells[4][5].colSpan = 2;
+}
+
+void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid)
+{
+	cgrid.cells[0][0].content = equDisp;
+	cgrid.cells[0][0].colSpan = 6;
+	cgrid.cells[0][6].content = btnBackspace;
+	
+	for (int i=0; i<4; i++) {
+		Slider *slider = new Slider();
+		cgrid.cells[i+1][1] = slider;
+		cgrid.cells[i+1][1].colSpan = 6;
+		
+		char varName[2] = {(char)('a' + i), '\0'};
+		Button *btn = new Button(varName, Button::C_BLUE);
+		btn->SetAction([slider, varName](Button&) {
+			equations[plotIndex].push_back(RpnInstruction(&slider->value, varName));
+			UpdateEquationDisplay();
+		});
+		cgrid.cells[i+1][0].content = btn;
+	}
 }

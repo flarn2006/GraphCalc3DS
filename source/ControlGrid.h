@@ -72,10 +72,10 @@ public:
 						activeCell = cell;
 					}
 					if (activeCell == cell || activeCell == nullptr) {
-						cell->content->TouchingInside(rect.x + x, rect.y + y);
+						cell->content->TouchingInside(x - rect.x, y - rect.y);
 					}
 				} else if (touching && cell == activeCell) {
-					cell->content->TouchingOutside(rect.x + x, rect.y + y);
+					cell->content->TouchingOutside(x - rect.x, y - rect.y);
 				} else {
 					cell->content->NotTouching();
 				}
