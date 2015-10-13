@@ -24,6 +24,7 @@ NumpadController numpad;
 std::vector<ControlGridBase*> controlGrids;
 int cgridIndex = 0;
 int plotIndex = 0;
+int keys = 0, down = 0;
 
 const int plotColors[] = { RGBA8(0x00, 0x00, 0xC0, 0xFF), RGBA8(0x00, 0x80, 0x00, 0xFF), RGBA8(0xD5, 0x00, 0xDD, 0xFF), RGBA8(0xD2, 0x94, 0x00, 0xFF) };
 
@@ -132,8 +133,8 @@ int main(int argc, char *argv[])
 	
 	while (aptMainLoop()) {
 		hidScanInput();
-		int keys = hidKeysHeld();
-		int down = hidKeysDown();
+		keys = hidKeysHeld();
+		down = hidKeysDown();
 		
 		touchPosition touch;
 		if (keys & KEY_TOUCH) {
@@ -144,11 +145,11 @@ int main(int argc, char *argv[])
 			break;
 		}
 		
-		if (keys & KEY_L) {
+		if ((keys & KEY_L) && !(keys & KEY_TOUCH)) {
 			view.ZoomOut(1.02f);
 		}
 		
-		if (keys & KEY_R) {
+		if ((keys & KEY_R) && !(keys & KEY_TOUCH)) {
 			view.ZoomIn(1.02f);
 		}
 		
@@ -372,6 +373,7 @@ void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid)
 	
 	for (int i=0; i<4; i++) {
 		Slider *slider = new Slider();
+		slider->value = 0.5f;
 		cgrid.cells[i+1][1] = slider;
 		cgrid.cells[i+1][1].colSpan = 5;
 		
@@ -381,5 +383,12 @@ void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid)
 			addInstruction(RpnInstruction(&slider->value, varName));
 		});
 		cgrid.cells[i+1][0].content = btn;
+		
+		btn = new Button("0-1", Button::C_ORANGE);
+		btn->SetAction([slider](Button&) {
+			slider->SetRange(0.0f, 1.0f);
+			slider->value = 0.5f;
+		});
+		cgrid.cells[i+1][6].content = btn;
 	}
 }

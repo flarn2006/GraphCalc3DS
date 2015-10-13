@@ -1,10 +1,12 @@
 #include <string>
+#include <3ds.h>
 #include <sf2d.h>
 #include <sftd.h>
 #include "Common.h"
 #include "Slider.h"
 
 extern sftd_font *font;
+extern int keys;
 
 Slider::Slider()
 {
@@ -23,8 +25,14 @@ Slider::Slider(float min, float max)
 void Slider::TouchingAnywhere(int x, int y)
 {
 	value = Interpolate((float)x, 1.0f, (float)(width - 2), min, max);
-	if (value < min) value = min;
-	else if (value > max) value = max;
+	
+	if (keys & (KEY_L | KEY_R)) {
+		if (value < min) min = value;
+		else if (value > max) max = value;
+	} else {
+		if (value < min) value = min;
+		else if (value > max) value = max;
+	}
 }
 
 void Slider::Draw(int x, int y, int w, int h)
