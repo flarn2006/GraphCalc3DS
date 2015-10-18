@@ -25,6 +25,7 @@ std::vector<ControlGridBase*> controlGrids;
 int cgridIndex = 0;
 int plotIndex = 0;
 int keys = 0, down = 0;
+bool altMode = false;
 
 const int plotColors[] = { RGBA8(0x00, 0x00, 0xC0, 0xFF), RGBA8(0x00, 0x80, 0x00, 0xFF), RGBA8(0xD5, 0x00, 0xDD, 0xFF), RGBA8(0xD2, 0x94, 0x00, 0xFF) };
 
@@ -153,8 +154,8 @@ int main(int argc, char *argv[])
 			view.ZoomIn(1.02f);
 		}
 		
-		if (keys & KEY_SELECT) {
-			view = ViewWindow(-5.0f, 5.0f, -3.0f, 3.0f);
+		if ((keys & KEY_SELECT) & !(keys & KEY_TOUCH)) {
+			altMode = !altMode;
 		}
 		
 		if (down & (KEY_DUP | KEY_DDOWN)) {
