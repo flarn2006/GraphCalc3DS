@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 			if (!traceUndefined)
 				sftd_draw_textf(font, 2, 22, color, 18, "Y = %.5f", cursor.y);
 		}
-		
+		if (altMode) sftd_draw_wtext(font, 2, 224, RGBA8(0x48, 0x67, 0x4E, 0xFF), 12, L"\x25B2");
 		sf2d_end_frame();
 		
 		sf2d_start_frame(GFX_BOTTOM, GFX_LEFT);
