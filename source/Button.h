@@ -24,6 +24,8 @@ public:
 	
 	virtual void Draw(int x, int y, int w, int h);
 	void SetText(const std::string &text);
+	void SetText(const std::string &text, const std::string &text_alt);
+	void SetText(const std::string &text, bool alt);
 	void SetColors(u32 off, u32 on);
 	void SetColors(u32 off, u32 on, u32 off_alt, u32 on_alt);
 	void SetColors(u32 off, u32 on, bool alt);

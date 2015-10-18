@@ -40,6 +40,17 @@ void Button::SetText(const std::string &text)
 	this->text = text_alt = text;
 }
 
+void Button::SetText(const std::string &text, const std::string &text_alt)
+{
+	this->text = text;
+	this->text_alt = text_alt;
+}
+
+void Button::SetText(const std::string &text, bool alt)
+{
+	(alt ? text_alt : this->text) = text;
+}
+
 void Button::SetColors(u32 off, u32 on)
 {
 	SetColors(off, on, off, on);

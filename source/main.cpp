@@ -317,12 +317,14 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 				RpnInstruction::Opcode opcode = btnInstructions[r][c].GetOpcode();
 				
 				if (r == 4 && c == 5) {
+					//clear button
 					btn->SetAction([](Button&) {
 						equations[plotIndex].clear();
 						numpad.Reset();
 						UpdateEquationDisplay();
 					});
 				} else if ((r > 0 && c < 3) || (r == 0 && c == 6)) {
+					//one of the numpad keys, or backspace
 					char key;
 					if (r == 0) { //&& c == 6, always the case if r == 0
 						key = '\b';
@@ -349,6 +351,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 						UpdateEquationDisplay();
 					});
 				} else if (opcode != RpnInstruction::OP_NULL) {
+					//one of the buttons that adds an RPN instruction
 					RpnInstruction inst = btnInstructions[r][c];
 					btn->SetAction([inst](Button&) {
 						addInstruction(inst);
