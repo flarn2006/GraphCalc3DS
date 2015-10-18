@@ -11,7 +11,7 @@ Button::Button()
 
 Button::Button(const std::string &text, ColorPreset colors)
 {
-	this->text = text;
+	this->text = text_alt = text;
 	SetColors(colors);
 }
 
@@ -20,6 +20,7 @@ void Button::Click()
 	if (callback) {
 		callback(*this);
 	}
+	altMode = false;
 }
 
 void Button::Draw(int x, int y, int w, int h)

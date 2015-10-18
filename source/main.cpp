@@ -26,6 +26,7 @@ int cgridIndex = 0;
 int plotIndex = 0;
 int keys = 0, down = 0;
 bool altMode = false;
+ViewWindow view(-5.0f, 5.0f, -3.0f, 3.0f);
 
 const int plotColors[] = { RGBA8(0x00, 0x00, 0xC0, 0xFF), RGBA8(0x00, 0x80, 0x00, 0xFF), RGBA8(0xD5, 0x00, 0xDD, 0xFF), RGBA8(0xD2, 0x94, 0x00, 0xFF) };
 
@@ -106,8 +107,6 @@ int main(int argc, char *argv[])
 	float traceUnit = 0;
 	bool traceUndefined = false;
 	
-	ViewWindow view(-5.0f, 5.0f, -3.0f, 3.0f);
-	
 	equations[0].push_back(1.25f);
 	equations[0].push_back(RpnInstruction(&exprX, "x"));
 	equations[0].push_back(RpnInstruction::OP_MULTIPLY);
@@ -154,7 +153,7 @@ int main(int argc, char *argv[])
 			view.ZoomIn(1.02f);
 		}
 		
-		if ((keys & KEY_SELECT) & !(keys & KEY_TOUCH)) {
+		if ((down & KEY_SELECT) && !(keys & KEY_TOUCH)) {
 			altMode = !altMode;
 		}
 		
@@ -318,10 +317,15 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 				
 				if (r == 4 && c == 5) {
 					//clear button
+					btn->SetText("def. view", true);
 					btn->SetAction([](Button&) {
-						equations[plotIndex].clear();
-						numpad.Reset();
-						UpdateEquationDisplay();
+						if (altMode) {
+							view = ViewWindow(-5.0f, 5.0f, -3.0f, 3.0f);
+						} else {
+							equations[plotIndex].clear();
+							numpad.Reset();
+							UpdateEquationDisplay();
+						}
 					});
 				} else if ((r > 0 && c < 3) || (r == 0 && c == 6)) {
 					//one of the numpad keys, or backspace
