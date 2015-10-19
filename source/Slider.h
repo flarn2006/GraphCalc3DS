@@ -19,6 +19,8 @@ public:
 	virtual void TouchingOutside(int x, int y);
 	
 	void SetRange(float min, float max);
+	void SetMinimum(float min);
+	void SetMaximum(float max);
 	float GetMinimum() const;
 	float GetMaximum() const;
 };

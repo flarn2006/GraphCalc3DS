@@ -387,15 +387,26 @@ void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid)
 		
 		char varName[2] = {(char)('a' + i), '\0'};
 		Button *btn = new Button(varName, Button::C_BLUE);
+		btn->SetText(">|", true);
 		btn->SetAction([slider, varName](Button&) {
-			addInstruction(RpnInstruction(&slider->value, varName));
+			if (altMode) {
+				slider->SetMinimum(slider->value);
+			} else {
+				addInstruction(RpnInstruction(&slider->value, varName));
+			}
 		});
 		cgrid.cells[i+1][0].content = btn;
 		
-		btn = new Button("0-1", Button::C_ORANGE);
+		btn = new Button("0-1");
+		btn->SetText("|<", true);
+		btn->SetColors(Button::C_ORANGE, Button::C_BLUE);
 		btn->SetAction([slider](Button&) {
-			slider->SetRange(0.0f, 1.0f);
-			slider->value = 0.5f;
+			if (altMode) {
+				slider->SetMaximum(slider->value);
+			} else {
+				slider->SetRange(0.0f, 1.0f);
+				slider->value = 0.5f;
+			}
 		});
 		cgrid.cells[i+1][6].content = btn;
 	}

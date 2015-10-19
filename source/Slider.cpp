@@ -63,6 +63,16 @@ void Slider::SetRange(float min, float max)
 	this->max = max;
 }
 
+void Slider::SetMinimum(float min)
+{
+	if (min < max) this->min = min;
+}
+
+void Slider::SetMaximum(float max)
+{
+	if (max > min) this->max = max;
+}
+
 float Slider::GetMinimum() const
 {
 	return min;
