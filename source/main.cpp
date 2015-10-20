@@ -286,6 +286,14 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 		{"0",     ".",     "+/-",   "+",     "x",     "clear", nullptr}
 	};
 	
+	const char *btnTextAlt[5][7] = {
+		{nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     nullptr},
+		{nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     nullptr},
+		{nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     "log"},
+		{nullptr,     nullptr,     nullptr,     nullptr,     "asin",      "acos",      "atan"},
+		{nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     "def. view", nullptr}
+	};
+	
 	constexpr Button::ColorPreset C_BLUE = Button::ColorPreset::C_BLUE;
 	constexpr Button::ColorPreset C_GREEN = Button::ColorPreset::C_GREEN;
 	constexpr Button::ColorPreset C_PINK = Button::ColorPreset::C_PINK;
@@ -307,17 +315,25 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_ADD, RpnInstruction(&exprX, "x"), RpnInstruction::OP_NULL, RpnInstruction::OP_NULL }
 	};
 	
+	const RpnInstruction btnInstructionsAlt[5][7] = {
+		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL },
+		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL },
+		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction(std::log10, "log", RpnInstruction::D_POSITIVE) },
+		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction(std::asin, "asin"), RpnInstruction(std::acos, "acos"), RpnInstruction(std::atan, "atan") },
+		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL }
+	};
+	
 	const char *numpadKeys[] = { "789", "456", "123", "0.-" };
 	
 	for (int r=0; r<5; r++) {
 		for (int c=0; c<7; c++) {
 			if (btnText[r][c] != nullptr) {
 				Button *btn = new Button(btnText[r][c], btnColors[r][c]);
+				if (btnTextAlt[r][c] != nullptr) btn->SetText(btnTextAlt[r][c], true);
 				RpnInstruction::Opcode opcode = btnInstructions[r][c].GetOpcode();
 				
 				if (r == 4 && c == 5) {
 					//clear button
-					btn->SetText("def. view", true);
 					btn->SetAction([](Button&) {
 						if (altMode) {
 							view = ViewWindow(-5.0f, 5.0f, -3.0f, 3.0f);
@@ -357,8 +373,10 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 				} else if (opcode != RpnInstruction::OP_NULL) {
 					//one of the buttons that adds an RPN instruction
 					RpnInstruction inst = btnInstructions[r][c];
-					btn->SetAction([inst](Button&) {
-						addInstruction(inst);
+					RpnInstruction instAlt = btnInstructionsAlt[r][c];
+					if (instAlt.GetOpcode() == RpnInstruction::OP_NULL) instAlt = inst;
+					btn->SetAction([inst, instAlt](Button&) {
+						addInstruction(altMode ? instAlt : inst);
 					});
 				}
 				
