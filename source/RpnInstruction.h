@@ -19,7 +19,8 @@ public:
 		OP_MODULO,
 		OP_POWER,
 		OP_NEGATE,
-		OP_FUNCTION
+		OP_FUNCTION,
+		OP_DUP
 	};
 	
 	enum Status {

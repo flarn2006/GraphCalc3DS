@@ -291,7 +291,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 		{nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     nullptr},
 		{nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     "log"},
 		{nullptr,     nullptr,     nullptr,     nullptr,     "asin",      "acos",      "atan"},
-		{nullptr,     nullptr,     nullptr,     nullptr,     nullptr,     "def. view", nullptr}
+		{nullptr,     nullptr,     nullptr,     nullptr,     "dup",       "def. view", nullptr}
 	};
 	
 	constexpr Button::ColorPreset C_BLUE = Button::ColorPreset::C_BLUE;
@@ -320,7 +320,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL },
 		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction(std::log10, "log", RpnInstruction::D_POSITIVE) },
 		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction(std::asin, "asin"), RpnInstruction(std::acos, "acos"), RpnInstruction(std::atan, "atan") },
-		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL }
+		{RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL, RpnInstruction::OP_DUP, RpnInstruction::OP_NULL, RpnInstruction::OP_NULL }
 	};
 	
 	const char *numpadKeys[] = { "789", "456", "123", "0.-" };
