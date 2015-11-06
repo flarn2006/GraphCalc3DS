@@ -31,6 +31,8 @@ BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
+APP_TITLE	:=	Graphing Calculator
+APP_AUTHOR	:=	flarn2006
 
 #---------------------------------------------------------------------------------
 # options for code generation
