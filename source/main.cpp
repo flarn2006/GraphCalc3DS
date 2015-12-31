@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 		circlePosition circle;
 		hidCircleRead(&circle);
 		
-		if (circle.dx * circle.dx + circle.dy * circle.dy > 15*15) {
+		if (circle.dx * circle.dx + circle.dy * circle.dy > 20*20) {
 			if (keys & (KEY_X | KEY_Y)) {
 				moveCursor(cursorX, cursorY, 0.05f * circle.dx, -0.05f * circle.dy);
 			} else {
