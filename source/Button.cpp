@@ -1,8 +1,8 @@
-#include <sftd.h>
+#include "BmpFont.h"
 #include "Button.h"
 
 extern bool altMode;
-extern sftd_font *font;
+extern BmpFont btnFont;
 
 Button::Button()
 {
@@ -31,9 +31,9 @@ void Button::Draw(int x, int y, int w, int h)
 	
 	sf2d_draw_rectangle(x+1, y+1, w-2, h-2, GetTouchState() == TS_TOUCHING ? c_on : c_off);
 	
-	int textX = x + w/2 - sftd_get_text_width(font, 20, str) / 2;
-	int textY = y + h/2 - 14;
-	sftd_draw_text(font, textX, textY, RGBA8(0xFF, 0xFF, 0xFF, 0xFF), 20, str);
+	int textX = x + w/2;
+	int textY = y + h/2 - btnFont.height() / 2;
+    btnFont.align(ALIGN_CENTER).drawStr(str, textX, textY);
 }
 
 void Button::SetText(const std::string &text)

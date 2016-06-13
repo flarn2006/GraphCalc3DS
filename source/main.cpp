@@ -5,6 +5,7 @@
 #include <cmath>
 #include <sstream>
 #include "ViewWindow.h"
+#include "BmpFont.h"
 #include "RpnInstruction.h"
 #include "TableLayout.h"
 #include "ControlGrid.h"
@@ -17,7 +18,7 @@ constexpr int plotCount = 4;
 
 std::vector<RpnInstruction> equations[plotCount];
 float exprX;
-sftd_font *font;
+BmpFont mainFont, btnFont;
 TextDisplay *equDisp;
 Control *btnBackspace;
 NumpadController numpad;
@@ -61,12 +62,12 @@ void drawGraph(const std::vector<RpnInstruction> &equation, const ViewWindow &vi
 			sf2d_draw_line(lastPoint.x, lastPoint.y, pt.x, pt.y, color);
 		} else if (status == RpnInstruction::S_OVERFLOW) {
 			if (showErrors) {
-				sftd_draw_text(font, 4, 4, color, 20, "Error: Stack overflow");
+                mainFont.drawStr("Error: Stack overflow", 4, 4, color);
 			}
 			break;
 		} else if (status == RpnInstruction::S_UNDERFLOW) {
 			if (showErrors) {
-				sftd_draw_text(font, 4, 4, color, 20, "Error: Stack underflow");
+                mainFont.drawStr("Error: Stack underflow", 4, 4, color);
 			}
 			break;
 		} else {
@@ -128,8 +129,8 @@ int main(int argc, char *argv[])
 	sf2d_set_clear_color(RGBA8(0xE0, 0xE0, 0xE0, 0xFF));
 	
 	romfsInit();
-	sftd_init();
-	font = sftd_load_font_file("font.ttf");
+	mainFont.load("mainfont.bff");
+    btnFont.load("buttons.bff");
 	
 	while (aptMainLoop()) {
 		hidScanInput();
@@ -229,11 +230,11 @@ int main(int argc, char *argv[])
 			}
 			u32 color = (keys & KEY_Y) ? RGBA8(0xFF, 0x00, 0x00, 0xFF) : RGBA8(0x00, 0xC0, 0x00, 0xFF);
 			drawAxes(view, color, cursor.x, cursor.y, traceUndefined);
-			sftd_draw_textf(font, 2, 0, color, 18, "X = %.5f", cursor.x);
+            mainFont.drawStr(ssprintf("X = %.5f", cursor.x), 2, 0, color);
 			if (!traceUndefined)
-				sftd_draw_textf(font, 2, 22, color, 18, "Y = %.5f", cursor.y);
+                mainFont.drawStr(ssprintf("Y = %.5f", cursor.y), 2, 22, color);
 		}
-		if (altMode) sftd_draw_wtext(font, 2, 224, RGBA8(0x48, 0x67, 0x4E, 0xFF), 12, L"\x25B2");
+        if (altMode) btnFont.align(ALIGN_LEFT).drawStr("ALT", 2, 225, RGBA8(0x48, 0x67, 0x4E, 0xFF));
 		sf2d_end_frame();
 		
 		sf2d_start_frame(GFX_BOTTOM, GFX_LEFT);
@@ -245,8 +246,6 @@ int main(int argc, char *argv[])
 	}
 	
 	romfsExit();
-	sftd_free_font(font);
-	sftd_fini();
 	sf2d_fini();
 	
 	return 0;

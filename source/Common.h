@@ -1,4 +1,7 @@
 #pragma once
+#include <string>
+#include <cstdio>
+#include <cstdarg>
 
 template <typename _T>
 struct Point
@@ -59,3 +62,6 @@ struct Rect
 };
 
 float Interpolate(float value, float inputMin, float inputMax, float outputMin, float outputMax);
+
+std::string vssprintf(const char *format, va_list arg);
+std::string ssprintf(const char *format, ...);
