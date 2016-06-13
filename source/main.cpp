@@ -108,12 +108,8 @@ int main(int argc, char *argv[])
 	float traceUnit = 0;
 	bool traceUndefined = false;
 	
-	equations[0].push_back(1.25f);
 	equations[0].push_back(RpnInstruction(&exprX, "x"));
-	equations[0].push_back(RpnInstruction::OP_MULTIPLY);
-	equations[0].push_back(RpnInstruction(&exprX, "x"));
-	equations[0].push_back(RpnInstruction(std::cos, "cos"));
-	equations[0].push_back(RpnInstruction::OP_MULTIPLY);
+	equations[0].push_back(RpnInstruction(std::sin, "sin"));
 	
 	ControlGrid<5, 7> cgridMain(45, 48);
 	cgridMain.SetDrawOffset(2, 0);
