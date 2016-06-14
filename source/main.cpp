@@ -59,7 +59,7 @@ void drawGraph(const std::vector<RpnInstruction> &equation, const ViewWindow &vi
 		pt = view.GetScreenCoords(exprX, y);
 		
 		if (status == RpnInstruction::S_OK && !ignoreLastPoint) {
-			sf2d_draw_line(lastPoint.x, lastPoint.y, pt.x, pt.y, color);
+			sf2d_draw_line(lastPoint.x, lastPoint.y, pt.x, pt.y, 2.0f, color);
 		} else if (status == RpnInstruction::S_OVERFLOW) {
 			if (showErrors) {
                 mainFont.drawStr("Error: Stack overflow", 4, 4, color);
@@ -129,8 +129,8 @@ int main(int argc, char *argv[])
 	sf2d_set_clear_color(RGBA8(0xE0, 0xE0, 0xE0, 0xFF));
 	
 	romfsInit();
-	mainFont.load("mainfont.bff");
-    btnFont.load("buttons.bff");
+	mainFont.load("romfs:/mainfont.bff");
+    btnFont.load("romfs:/buttons.bff");
 	
 	while (aptMainLoop()) {
 		hidScanInput();
