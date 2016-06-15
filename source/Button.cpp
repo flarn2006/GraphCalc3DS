@@ -1,5 +1,6 @@
 #include "BmpFont.h"
 #include "Button.h"
+#include "Common.h"
 
 extern bool altMode;
 extern BmpFont btnFont;
@@ -29,7 +30,13 @@ void Button::Draw(int x, int y, int w, int h)
 	u32 c_off = altMode ? color_off_alt : color_off;
 	const char *str = (altMode ? text_alt : text).c_str();
 	
-	sf2d_draw_rectangle(x+1, y+1, w-2, h-2, GetTouchState() == TS_TOUCHING ? c_on : c_off);
+    bool pressed = (GetTouchState() == TS_TOUCHING);
+    if (!pressed) {
+        sf2d_draw_rectangle(x+1, y+1, w-2, h-2, c_off);
+        sf2d_draw_rectangle_gradient(x+1, y+1, w-2, h/2-2, RGBA8(0xFF, 0xFF, 0xFF, 0x20), RGBA8(0xFF, 0xFF, 0xFF, 0x60), SF2D_TOP_TO_BOTTOM);
+    } else {
+        sf2d_draw_rectangle_gradient(x+1, y+1, w-2, h-2, c_off, c_on, SF2D_TOP_TO_BOTTOM);
+    }
 	
 	int textX = x + w/2;
 	int textY = y + h/2 - btnFont.height() / 2;

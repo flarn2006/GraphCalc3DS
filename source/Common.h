@@ -2,6 +2,7 @@
 #include <string>
 #include <cstdio>
 #include <cstdarg>
+#include <sf2d.h>
 
 template <typename _T>
 struct Point

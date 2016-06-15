@@ -15,7 +15,7 @@ TextDisplay::TextDisplay(const std::string &text)
 
 void TextDisplay::Draw(int x, int y, int w, int h)
 {
-	sf2d_draw_rectangle(x, y, w, h, RGBA8(0xFF, 0xFF, 0xFF, 0xFF));
+	sf2d_draw_rectangle_gradient(x, y, w, h, RGBA8(0xD0, 0xD0, 0xD0, 0xFF), RGBA8(0xFF, 0xFF, 0xFF, 0xFF), SF2D_TOP_TO_BOTTOM);
     mainFont.drawStrWrap(text, x+4, y, w-4, textColor);
 }
 

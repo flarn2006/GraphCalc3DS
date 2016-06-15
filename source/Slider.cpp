@@ -39,9 +39,10 @@ void Slider::Draw(int x, int y, int w, int h)
 {
 	width = w;
 	int fillWidth = (int)Interpolate(value, min, max, 0.0f, (float)(w - 2));
-	sf2d_draw_rectangle(x+1, y+1, w-2, h-2, RGBA8(0xFF, 0xFF, 0xFF, 0xFF));
+	sf2d_draw_rectangle_gradient(x+1, y+1, w-2, h-2, RGBA8(0xF0, 0xF0, 0xF0, 0xFF), RGBA8(0xFF, 0xFF, 0xFF, 0xFF), SF2D_TOP_TO_BOTTOM);
 	sf2d_draw_rectangle(x+1, y+1, fillWidth, h-2, RGBA8(0x00, 0xCC, 0xFF, 0xFF));
     mainFont.drawStr(ssprintf("%.5f", value), x + 8, y + h/2 - mainFont.height()/2, RGBA8(0x00, 0x00, 0x00, 0xFF));
+    sf2d_draw_rectangle_gradient(x+1, y+1, w-2, h/2-2, RGBA8(0xFF, 0xFF, 0xFF, 0x20), RGBA8(0xFF, 0xFF, 0xFF, 0x60), SF2D_TOP_TO_BOTTOM);
 }
 
 void Slider::TouchingInside(int x, int y)
