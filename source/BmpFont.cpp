@@ -11,11 +11,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 #include <cstdio>
+#include <sstream>
 #include "BmpFont.h"
 
 BmpFont::BmpFont()
 {
-    texture = nullptr;
     unclip();
 }
 
@@ -25,85 +25,88 @@ BmpFont::BmpFont(const char *filename)
     load(filename);
 }
 
-BmpFont::~BmpFont()
+BmpFont::FontData::~FontData()
 {
-    if (texture != nullptr) free();
+    sf2d_free_texture(texture);
 }
 
 bool BmpFont::load(const char *filename)
 {
-    if (texture != nullptr) free();
+    data.reset(new FontData());
     
     std::FILE *fp = std::fopen(filename, "rb");
-    
+
     if (fp) {
         u8 temp[2];
         std::fread(temp, 1, 2, fp);
-        
+
         if (temp[0] != 0xBF || temp[1] != 0xF2) {
             std::fclose(fp);
+            data.reset();
             return false;
         }
-        
-        std::fread(&imgWidth, 4, 1, fp);
-        std::fread(&imgHeight, 4, 1, fp);
-        std::fread(&cellWidth, 4, 1, fp);
-        std::fread(&cellHeight, 4, 1, fp);
-        
+
+        std::fread(&data->imgWidth, 4, 1, fp);
+        std::fread(&data->imgHeight, 4, 1, fp);
+        std::fread(&data->cellWidth, 4, 1, fp);
+        std::fread(&data->cellHeight, 4, 1, fp);
+
         u8 bitCount;
         std::fread(&bitCount, 1, 1, fp);
-        
-        std::fread(&baseChar, 1, 1, fp);
-        std::fread(charWidths, 1, 256, fp);
-        
-        std::size_t byteCount = 4 * imgWidth * imgHeight;
-        u8 *data = new u8[byteCount];
-        
+
+        std::fread(&data->baseChar, 1, 1, fp);
+        std::fread(data->charWidths, 1, 256, fp);
+
+        std::size_t byteCount = 4 * data->imgWidth * data->imgHeight;
+        u8 *texdata = new u8[byteCount];
+
         if (bitCount == 8) {
-            u8 *ptr = data;
+            u8 *ptr = texdata;
             for (std::size_t i=0; i<byteCount/4; ++i) {
                 ptr[0] = ptr[1] = ptr[2] = 0xFF;
                 std::fread(&ptr[3], 1, 1, fp);
                 ptr += 4;
             }
         } else if (bitCount == 24) {
-            u8 *ptr = data;
+            u8 *ptr = texdata;
             for (std::size_t i=0; i<byteCount/4; ++i) {
                 std::fread(ptr, 1, 3, fp);
                 ptr[3] = 0xFF;
                 ptr += 4;
             }
         } else if (bitCount == 32) {
-            std::fread(data, 1, byteCount, fp);
+            std::fread(texdata, 1, byteCount, fp);
         } else {
             std::fclose(fp);
+            data.reset();
             return false;
         }
-        
-        texture = sf2d_create_texture_mem_RGBA8(data, imgWidth, imgHeight, TEXFMT_RGBA8, SF2D_PLACE_RAM);
-        delete[] data;
-        
+
+        data->texture = sf2d_create_texture_mem_RGBA8(texdata, data->imgWidth, data->imgHeight, TEXFMT_RGBA8, SF2D_PLACE_RAM);
+        delete[] texdata;
+
         std::fclose(fp);
-        
+
         return true;
     } else {
+        data.reset();
         return false;
     }
 }
 
 u8 BmpFont::drawChar(char ch, int x, int y, u32 color) const
 {
-    u8 cols = imgWidth / cellWidth;
-    u8 rows = imgHeight / cellHeight;
-    unsigned char maxChar = std::min((int)baseChar + (cols * rows - 1), 255);
-    unsigned char &uc = *(unsigned char *)&ch;
-    
-    if (baseChar <= uc && uc <= maxChar) {
-        int tx = ((uc - baseChar) % cols) * cellWidth;
-        int ty = ((uc - baseChar) / cols) * cellHeight;
-        int width = cellWidth;
-        int height = cellHeight;
-        
+    u8 cols = data->imgWidth / data->cellWidth;
+    u8 rows = data->imgHeight / data->cellHeight;
+    unsigned char maxChar = std::min((int)data->baseChar + (cols * rows - 1), 255);
+    unsigned char uc = ch;
+
+    if (data->baseChar <= uc && uc <= maxChar) {
+        int tx = ((uc - data->baseChar) % cols) * data->cellWidth;
+        int ty = ((uc - data->baseChar) / cols) * data->cellHeight;
+        int width = data->cellWidth;
+        int height = data->cellHeight;
+
         if (isClipped()) {
             if (x < clipLeft) {
                 tx += (clipLeft - x);
@@ -120,11 +123,11 @@ u8 BmpFont::drawChar(char ch, int x, int y, u32 color) const
             if (y + height > clipBottom)
                 height = clipBottom - y;
         }
-        
+
         if (width > 0 && height > 0)
-            sf2d_draw_texture_part_blend(texture, x, y, tx, ty, width, height, color);
-        
-        return charWidths[uc];
+            sf2d_draw_texture_part_blend(data->texture, x, y, tx, ty, width, height, color);
+
+        return data->charWidths[uc];
     } else {
         return 0;
     }
@@ -135,90 +138,92 @@ void BmpFont::splitToLines(const std::string &str, std::vector<std::string> &lin
     lines.clear();
     if (wrapWidth == 0) {
         // No wrapping
-        std::string curLine = "";
-        for (auto i = str.begin(); i != str.end(); ++i) {
-            if (*i == '\n') {
-                lines.push_back(curLine);
-                curLine = "";
+        std::stringstream curLine;
+        for (const auto &ch : str) {
+            if (ch == '\n') {
+                lines.push_back(curLine.str());
+                curLine.str("");
             } else {
-                curLine += *i;
+                curLine << ch;
             }
         }
-        lines.push_back(curLine);
+        lines.push_back(curLine.str());
     } else if (wrapWidth > 0) {
         // Word wrap
         std::vector<std::string> words;
-        std::string curWord = "";
+        std::stringstream curWord;
         u32 curX = 0;
-        
-        for (auto i = str.begin(); i != str.end(); ++i) {
-            u8 curCharWidth = charWidths[*(unsigned char *)&*i];
+
+        for (const auto &ch : str) {
+            u8 curCharWidth = data->charWidths[(unsigned char)ch];
             bool ignoreWhitespace = false;
-            
+
             if (curX + curCharWidth > (unsigned)wrapWidth) {
-                words.push_back(curWord);
-                curWord = "";
+                words.push_back(curWord.str());
+                curWord.str("");
                 curX = 0;
                 ignoreWhitespace = true;
             }
-            
-            if ((!ignoreWhitespace || *i != ' ') && *i != '\n') {
-                curWord += *i;
+
+            if ((!ignoreWhitespace || ch != ' ') && ch != '\n') {
+                curWord << ch;
                 curX += curCharWidth;
             }
-            
-            if (*i == ' ' || *i == '\n' || *i == '-') {
-                words.push_back(curWord);
-                curWord = "";
+
+            if (ch == ' ' || ch == '\n' || ch == '-') {
+                words.push_back(curWord.str());
+                curWord.str("");
                 curX = 0;
-                if (*i == '\n')
+                if (ch == '\n')
                     words.push_back("\n");
             }
         }
-        
-        if (curWord.size() > 0)
-            words.push_back(curWord);
-        
-        std::string curLine = "";
+
+        std::string lastWord = curWord.str();
+        if (!lastWord.empty())
+            words.push_back(lastWord);
+
+        std::stringstream curLine;
         curX = 0;
-        
-        for (auto i = words.begin(); i != words.end(); ++i) {
-            u32 curWidth = getLineWidth(*i);
-            
-            if (curX + curWidth > (unsigned)wrapWidth || (*i)[0] == '\n') {
-                lines.push_back(curLine);
-                curLine = "";
+
+        for (const auto &word : words) {
+            u32 curWidth = getLineWidth(word);
+
+            if (curX + curWidth > (unsigned)wrapWidth || word[0] == '\n') {
+                lines.push_back(curLine.str());
+                curLine.str("");
                 curX = 0;
             }
-            
-            if ((*i)[0] != '\n') {
-                curLine += *i;
+
+            if (word[0] != '\n') {
+                curLine << word;
                 curX += curWidth;
             }
         }
-        
-        if (curLine.size() > 0)
-            lines.push_back(curLine);
+
+        std::string lastLine = curLine.str();
+        if (!lastLine.empty())
+            lines.push_back(lastLine);
     } else {
         // Character wrap
         wrapWidth = -wrapWidth;
-        std::string curLine;
+        std::stringstream curLine;
         u32 curX = 0;
-        
-        for (auto i = str.begin(); i != str.end(); ++i) {
-            unsigned char &uc = *(unsigned char *)&*i;
-            if (*i == '\n' || curX + charWidths[uc] > (unsigned)wrapWidth) {
-                lines.push_back(curLine);
-                curLine = "";
+
+        for (const auto &ch : str) {
+            unsigned char uc = ch;
+            if (ch == '\n' || curX + data->charWidths[uc] > (unsigned)wrapWidth) {
+                lines.push_back(curLine.str());
+                curLine.str("");
                 curX = 0;
             }
-            if (*i != '\n') {
-                curLine += *i;
-                curX += charWidths[uc];
+            if (ch != '\n') {
+                curLine << ch;
+                curX += data->charWidths[uc];
             }
         }
-        
-        lines.push_back(curLine);
+
+        lines.push_back(curLine.str());
     }
 }
 
@@ -226,15 +231,15 @@ u32 BmpFont::drawStrInternal(const std::string &str, int x, int y, u32 color) co
 {
     u32 curX = 0;
     u32 width = 0;
-    
+
     if (alignment == ALIGN_RIGHT) {
         x -= getTextWidth(str);
     } else if (alignment == ALIGN_CENTER) {
         x -= getTextWidth(str) / 2;
     }
-    
-    for (auto i = str.begin(); i != str.end(); ++i) {
-        curX += drawChar(*i, x + curX, y, color);
+
+    for (const auto &ch : str) {
+        curX += drawChar(ch, x + curX, y, color);
         if (curX > width) width = curX;
     }
     return width;
@@ -244,14 +249,14 @@ u32 BmpFont::drawStr(const std::string &str, int x, int y, u32 color) const
 {
     std::vector<std::string> lines;
     splitToLines(str, lines, 0);
-    
+
     u32 width = 0;
     for (std::size_t i=0; i<lines.size(); ++i) {
-        u32 curWidth = drawStrInternal(lines[i], x, y+cellHeight*i, color);
+        u32 curWidth = drawStrInternal(lines[i], x, y+data->cellHeight*i, color);
         if (curWidth > width)
             width = curWidth;
     }
-    
+
     return width;
 }
 
@@ -259,19 +264,19 @@ u32 BmpFont::drawStrWrap(const std::string &str, int x, int y, int wrapWidth, u3
 {
     std::vector<std::string> lines;
     splitToLines(str, lines, wrapWidth);
-    
+
     for (std::size_t i=0; i<lines.size(); ++i) {
-        drawStrInternal(lines[i], x, y+cellHeight*i, color);
+        drawStrInternal(lines[i], x, y+data->cellHeight*i, color);
     }
-    
-    return lines.size() * cellHeight;
+
+    return lines.size() * data->cellHeight;
 }
 
 u32 BmpFont::getLineWidth(const std::string &line) const
 {
     u32 width = 0;
-    for (auto i = line.begin(); i != line.end(); ++i) {
-        width += charWidths[*(unsigned char *)&*i];
+    for (const auto &ch : line) {
+        width += data->charWidths[(unsigned char)ch];
     }
     return width;
 }
@@ -280,15 +285,15 @@ void BmpFont::getTextDims(const std::string &str, u32 &width, u32 &height, int w
 {
     std::vector<std::string> lines;
     splitToLines(str, lines, wrapWidth);
-    
+
     width = 0;
-    for (auto i = lines.begin(); i != lines.end(); ++i) {
-        u32 curWidth = getLineWidth(*i);
+    for (const auto &line : lines) {
+        u32 curWidth = getLineWidth(line);
         if (curWidth > width)
             width = curWidth;
     }
-    
-    height = lines.size() * cellHeight;
+
+    height = lines.size() * data->cellHeight;
 }
 
 u32 BmpFont::getTextWidth(const std::string &str, int wrapWidth) const
@@ -307,8 +312,7 @@ u32 BmpFont::getTextHeight(const std::string &str, int wrapWidth) const
 
 void BmpFont::free()
 {
-    sf2d_free_texture(texture);
-    texture = nullptr;
+    data.reset();
 }
 
 BmpFont &BmpFont::align(TextAlignment alignment)
@@ -317,25 +321,46 @@ BmpFont &BmpFont::align(TextAlignment alignment)
     return *this;
 }
 
+BmpFont BmpFont::align(TextAlignment alignment) const
+{
+    BmpFont bf = *this;
+    bf.align(alignment);
+    return bf;
+}
+
 BmpFont &BmpFont::clip(int left, int top, int right, int bottom)
 {
     if (left > right)
         std::swap(left, right);
     if (top > bottom)
         std::swap(top, bottom);
-    
+
     clipLeft = left;
     clipTop = top;
     clipRight = right;
     clipBottom = bottom;
-    
+
     return *this;
+}
+
+BmpFont BmpFont::clip(int left, int top, int right, int bottom) const
+{
+    BmpFont bf = *this;
+    bf.clip(left, top, right, bottom);
+    return bf;
 }
 
 BmpFont &BmpFont::unclip()
 {
     clipLeft = clipTop = clipRight = clipBottom = 0;
     return *this;
+}
+
+BmpFont BmpFont::unclip() const
+{
+    BmpFont bf = *this;
+    bf.unclip();
+    return bf;
 }
 
 bool BmpFont::isClipped() const
@@ -345,10 +370,10 @@ bool BmpFont::isClipped() const
 
 BmpFont::operator bool() const
 {
-    return (texture != nullptr);
+    return (bool)data;
 }
 
 u32 BmpFont::height() const
 {
-    return cellHeight;
+    return data->cellHeight;
 }

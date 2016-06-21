@@ -13,20 +13,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #pragma once
 #include <string>
 #include <vector>
+#include <memory>
 #include <sf2d.h>
 
 enum TextAlignment { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT };
 
 class BmpFont
-{   
+{
 private:
-    sf2d_texture *texture;
-    u32 imgWidth, imgHeight;
-    u32 cellWidth, cellHeight;
-    unsigned char baseChar;
+    struct FontData
+    {
+        sf2d_texture *texture;
+        u32 imgWidth, imgHeight;
+        u32 cellWidth, cellHeight;
+        unsigned char baseChar;
+        u8 charWidths[256];
+        ~FontData();
+    };
+    
+    std::shared_ptr<FontData> data;
     TextAlignment alignment;
     int clipLeft, clipTop, clipRight, clipBottom;
-    u8 charWidths[256];
     
     static constexpr u32 WHITE = RGBA8(0xFF, 0xFF, 0xFF, 0xFF);
     
@@ -37,7 +44,6 @@ private:
 public:
     BmpFont();
     BmpFont(const char *filename);
-    ~BmpFont();
     
     bool load(const char *filename);
     u8 drawChar(char ch, int x, int y, u32 color = WHITE) const;
@@ -49,14 +55,14 @@ public:
     void free();
     
     BmpFont &align(TextAlignment alignment);
+    BmpFont align(TextAlignment alignment) const;
     
     BmpFont &clip(int left, int top, int right, int bottom);
+    BmpFont clip(int left, int top, int right, int bottom) const;
     BmpFont &unclip();
+    BmpFont unclip() const;
     bool isClipped() const;
     
     operator bool() const;
     u32 height() const;
-    
-    BmpFont(const BmpFont &other) = delete;
-    const BmpFont &operator=(const BmpFont &other) = delete;
 };
