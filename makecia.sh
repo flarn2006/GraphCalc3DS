@@ -1,10 +1,10 @@
 #!/bin/bash
 PROJNAME=$(basename $PWD)
-SHORTNAME=$PROJNAME
-LONGNAME=$PROJNAME
+SHORTNAME="Graphing Calculator"
+LONGNAME="Graphing Calculator"
 PRODUCT_CODE=$PROJNAME
 PUBNAME='flarn2006'
-UNIQUE_ID='0x12345'
+UNIQUE_ID='0xf7183'
 
 cp template.rsf cia.rsf
 sed -i "s/@@TITLE@@/$SHORTNAME/g" cia.rsf
