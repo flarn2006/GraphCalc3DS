@@ -19,6 +19,13 @@ void TextDisplay::Draw(int x, int y, int w, int h)
     mainFont.drawStrWrap(text, x+4, y, w-4, textColor);
 }
 
+void TextDisplay::Click()
+{
+	if (callback) {
+		callback(*this);
+	}
+}
+
 void TextDisplay::SetText(const std::string &text)
 {
 	this->text = text;
@@ -27,4 +34,9 @@ void TextDisplay::SetText(const std::string &text)
 void TextDisplay::SetTextColor(u32 color)
 {
 	textColor = color;
+}
+
+void TextDisplay::SetAction(callback_t callback)
+{
+	this->callback = callback;
 }
