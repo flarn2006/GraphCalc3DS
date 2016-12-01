@@ -236,8 +236,8 @@ int main(int argc, char *argv[])
 		irrstCstickRead(&cstick);
 		bool cstickZero = (cstick.dx == 0 && cstick.dy == 0);
 		if (!cstickZero || !ignoreCstickIfZero) {
-			sliders[0]->value = Interpolate(cstick.dx, -146, 146, sliders[0]->GetMinimum(), sliders[1]->GetMaximum());
-			sliders[1]->value = Interpolate(cstick.dy, -146, 146, sliders[0]->GetMinimum(), sliders[1]->GetMaximum());
+			sliders[0]->value = Interpolate(cstick.dx, -146, 146, sliders[0]->GetMinimum(), sliders[0]->GetMaximum());
+			sliders[1]->value = Interpolate(cstick.dy, -146, 146, sliders[1]->GetMinimum(), sliders[1]->GetMaximum());
 			ignoreCstickIfZero = cstickZero;
 		}
 		
