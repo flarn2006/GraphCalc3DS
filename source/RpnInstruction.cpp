@@ -32,6 +32,13 @@ RpnInstruction::RpnInstruction(func_t func, const char *name, int domain)
 	this->domain = domain;
 }
 
+RpnInstruction::RpnInstruction(const char *expression)
+{
+	op = OP_EXPR;
+	name = expression;
+	expr = TinyExpr(expression);
+}
+
 RpnInstruction::Opcode RpnInstruction::GetOpcode() const
 {
 	return op;

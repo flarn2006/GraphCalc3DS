@@ -13,6 +13,7 @@ class TinyExpr
 	double x;
 
 public:
+	TinyExpr();
 	TinyExpr(const char *expression);
 	double Evaluate(double x);
 	int GetError() const;

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "TinyExpr.h"
 
 class RpnInstruction
 {
@@ -20,7 +21,8 @@ public:
 		OP_POWER,
 		OP_NEGATE,
 		OP_FUNCTION,
-		OP_DUP
+		OP_DUP,
+		OP_EXPR
 	};
 	
 	enum Status {
@@ -41,20 +43,15 @@ public:
 	
 private:
 	Opcode op;
-	union {
-		float value;
-		struct {
-			union {
-				const float *var;
-				struct {
-					func_t func;
-					int domain;
-				};
-			};
-			const char *name;
-		};
-	}; // Yes, I know that was complex. :)
-	
+	// Not all of these will be used at the same time.
+	// Which one(s) depends on the opcode.
+	float value;
+	const float *var;
+	func_t func;
+	int domain;
+	TinyExpr expr;
+	std::string name;
+
 	bool IsInDomain(float value) const;
 	
 public:
@@ -63,6 +60,7 @@ public:
 	RpnInstruction(float value);
 	RpnInstruction(const float *var, const char *name);
 	RpnInstruction(func_t func, const char *name, int domain = D_ALL);
+	RpnInstruction(const char *expression);
 	
 	Opcode GetOpcode() const;
 	Status Execute(std::vector<float> &stack) const;
