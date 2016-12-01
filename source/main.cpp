@@ -33,6 +33,7 @@ const int plotColors[] = { RGBA8(0x00, 0x00, 0xC0, 0xFF), RGBA8(0x00, 0x80, 0x00
 void UpdateEquationDisplay();
 void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid);
 void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid);
+SwkbdCallbackResult ValidateSwkbdExpr(void *user, const char **ppMessage, const char *text, size_t textlen);
 
 void drawAxes(const ViewWindow &view, u32 color, float originX = 0.0f, float originY = 0.0f, bool hideHorizontal = false)
 {
@@ -139,6 +140,21 @@ int main(int argc, char *argv[])
 		
 		if (keys & KEY_START) {
 			break;
+		}
+
+		if (keys & KEY_A) {
+			SwkbdState swkbd;
+			swkbdInit(&swkbd, SWKBD_TYPE_QWERTY, 2, 512);
+			swkbdSetValidation(&swkbd, SWKBD_NOTEMPTY_NOTBLANK, SWKBD_FILTER_CALLBACK, 0);
+			swkbdSetFilterCallback(&swkbd, ValidateSwkbdExpr, nullptr);
+			swkbdSetHintText(&swkbd, "Enter a function of 'x'\nexample: sin(x)+cos(2*x)");
+			char buf[512];
+			if (swkbdInputText(&swkbd, buf, 512) == SWKBD_BUTTON_RIGHT) {
+				equations[plotIndex].clear();
+				equations[plotIndex].emplace_back(&exprX, "y =");
+				equations[plotIndex].emplace_back(buf);
+				UpdateEquationDisplay();
+			}
 		}
 		
 		if ((keys & KEY_L) && !(keys & KEY_TOUCH)) {
@@ -276,26 +292,9 @@ SwkbdCallbackResult ValidateSwkbdExpr(void *user, const char **ppMessage, const 
 	}
 }
 
-void EquDispTouchAction(TextDisplay &td)
-{
-	SwkbdState swkbd;
-	swkbdInit(&swkbd, SWKBD_TYPE_QWERTY, 2, 512);
-	swkbdSetValidation(&swkbd, SWKBD_NOTEMPTY_NOTBLANK, SWKBD_FILTER_CALLBACK, 0);
-	swkbdSetFilterCallback(&swkbd, ValidateSwkbdExpr, nullptr);
-	swkbdSetHintText(&swkbd, "Enter a function of 'x'");
-	char buf[512];
-	if (swkbdInputText(&swkbd, buf, 512) == SWKBD_BUTTON_RIGHT) {
-		equations[plotIndex].clear();
-		equations[plotIndex].emplace_back(&exprX, "y =");
-		equations[plotIndex].emplace_back(buf);
-		UpdateEquationDisplay();
-	}
-}
-
 void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 {
 	equDisp = new TextDisplay();
-	equDisp->SetAction(EquDispTouchAction);
 	cgrid.cells[0][0].content = equDisp;
 	UpdateEquationDisplay();
 	
