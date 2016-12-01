@@ -148,6 +148,16 @@ int main(int argc, char *argv[])
 			swkbdSetValidation(&swkbd, SWKBD_NOTEMPTY_NOTBLANK, SWKBD_FILTER_CALLBACK, 0);
 			swkbdSetFilterCallback(&swkbd, ValidateSwkbdExpr, nullptr);
 			swkbdSetHintText(&swkbd, "Enter a function of 'x'\nexample: sin(x)+cos(2*x)");
+
+			if (!equations[plotIndex].empty()) {
+				const RpnInstruction &inst = equations[plotIndex].back();
+				if (inst.GetOpcode() == RpnInstruction::OP_EXPR) {
+					std::ostringstream ss;
+					ss << equations[plotIndex].back();
+					swkbdSetInitialText(&swkbd, ss.str().c_str());
+				}
+			}
+
 			char buf[512];
 			if (swkbdInputText(&swkbd, buf, 512) == SWKBD_BUTTON_RIGHT) {
 				equations[plotIndex].clear();

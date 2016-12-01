@@ -63,6 +63,7 @@ public:
 	RpnInstruction(const char *expression);
 	
 	Opcode GetOpcode() const;
+	const std::string &GetName() const;
 	Status Execute(std::vector<float> &stack) const;
 };
 
