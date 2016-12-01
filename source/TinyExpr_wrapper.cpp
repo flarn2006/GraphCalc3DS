@@ -26,6 +26,16 @@ double TinyExpr::Evaluate(double x)
 	}
 }
 
+double TinyExpr::Evaluate(double x) const
+{
+	if (!error) {
+		TinyExpr expr2 = *this;
+		return expr2.Evaluate(x);
+	} else {
+		return std::numeric_limits<double>::quiet_NaN();
+	}
+}
+
 int TinyExpr::GetError() const
 {
 	return error;

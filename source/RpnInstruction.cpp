@@ -165,6 +165,14 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 				stack.push_back(stack.back());
 				return S_OK;
 			}
+		case OP_EXPR:
+			if (stack.size() == 0) {
+				return S_UNDERFLOW;
+			} else {
+				float &back = stack.back();
+				back = expr.Evaluate(back);
+				return S_OK;
+			}
 		default:
 			return S_UNDEFINED;
 	}
@@ -203,6 +211,9 @@ std::ostream &operator<<(std::ostream &os, const RpnInstruction &inst)
 			break;
 		case RpnInstruction::OP_DUP:
 			os << "dup";
+			break;
+		case RpnInstruction::OP_EXPR:
+			os << inst.name;
 			break;
 		default:
 			os << "???";

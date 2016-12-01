@@ -286,7 +286,9 @@ void EquDispTouchAction(TextDisplay &td)
 	char buf[512];
 	if (swkbdInputText(&swkbd, buf, 512) == SWKBD_BUTTON_RIGHT) {
 		equations[plotIndex].clear();
+		equations[plotIndex].emplace_back(&exprX, "y =");
 		equations[plotIndex].emplace_back(buf);
+		UpdateEquationDisplay();
 	}
 }
 

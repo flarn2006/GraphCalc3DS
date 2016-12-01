@@ -16,6 +16,7 @@ public:
 	TinyExpr();
 	TinyExpr(const char *expression);
 	double Evaluate(double x);
+	double Evaluate(double x) const;
 	int GetError() const;
 	static int TestExpr(const char *expression);
 };
