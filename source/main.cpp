@@ -266,9 +266,34 @@ void UpdateEquationDisplay()
 	equDisp->SetTextColor(plotColors[plotIndex]);
 }
 
+SwkbdCallbackResult ValidateSwkbdExpr(void *user, const char **ppMessage, const char *text, size_t textlen)
+{
+	if (TinyExpr::TestExpr(text) == 0) {
+		return SWKBD_CALLBACK_OK;
+	} else {
+		*ppMessage = "Invalid expression entered.";
+		return SWKBD_CALLBACK_CONTINUE;
+	}
+}
+
+void EquDispTouchAction(TextDisplay &td)
+{
+	SwkbdState swkbd;
+	swkbdInit(&swkbd, SWKBD_TYPE_QWERTY, 2, 512);
+	swkbdSetValidation(&swkbd, SWKBD_NOTEMPTY_NOTBLANK, SWKBD_FILTER_CALLBACK, 0);
+	swkbdSetFilterCallback(&swkbd, ValidateSwkbdExpr, nullptr);
+	swkbdSetHintText(&swkbd, "Enter a function of 'x'");
+	char buf[512];
+	if (swkbdInputText(&swkbd, buf, 512) == SWKBD_BUTTON_RIGHT) {
+		equations[plotIndex].clear();
+		equations[plotIndex].emplace_back(buf);
+	}
+}
+
 void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 {
 	equDisp = new TextDisplay();
+	equDisp->SetAction(EquDispTouchAction);
 	cgrid.cells[0][0].content = equDisp;
 	UpdateEquationDisplay();
 	
