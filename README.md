@@ -7,9 +7,11 @@ Requires [sf2dlib](https://github.com/xerpi/sf2dlib).
 ## Controls
 
 * **Circle pad:** Pan view, move cursor
+* **C-stick:** Control sliders A and B *(New 3DS only, may work with Circle Pad Pro)*
 * **L / R:** Zoom
 * **Up / Down:** Change active plot (for equation editing/trace cursor)
 * **Left / Right:** Fine trace, change screen page
+* **A:** Enter equation using algebraic notation (what you're probably used to)
 * **X:** Hold for free cursor
 * **Y:** Hold to trace graph (hold **B** to snap to units)
 * **Select:** Toggle alt-function mode (like the 2nd key)

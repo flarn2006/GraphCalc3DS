@@ -27,6 +27,7 @@ int plotIndex = 0;
 int keys = 0, down = 0;
 bool altMode = false;
 ViewWindow view(-5.0f, 5.0f, -3.0f, 3.0f);
+Slider *sliders[4];
 
 const int plotColors[] = { RGBA8(0x00, 0x00, 0xC0, 0xFF), RGBA8(0x00, 0x80, 0x00, 0xFF), RGBA8(0xD5, 0x00, 0xDD, 0xFF), RGBA8(0xD2, 0x94, 0x00, 0xFF) };
 
@@ -121,6 +122,8 @@ int main(int argc, char *argv[])
 	SetUpVarsControlGrid(cgridVars);
 	controlGrids.push_back(&cgridVars);
 	
+	irrstInit();
+
 	sf2d_init();
 	sf2d_set_clear_color(RGBA8(0xE0, 0xE0, 0xE0, 0xFF));
 	
@@ -227,6 +230,16 @@ int main(int argc, char *argv[])
 				view.Pan(0.0002f * rangeX * circle.dx, 0.0002f * rangeY * circle.dy);
 			}
 		}
+
+		circlePosition cstick;
+		static bool ignoreCstickIfZero = true;
+		irrstCstickRead(&cstick);
+		bool cstickZero = (cstick.dx == 0 && cstick.dy == 0);
+		if (!cstickZero || !ignoreCstickIfZero) {
+			sliders[0]->value = Interpolate(cstick.dx, -146, 146, sliders[0]->GetMinimum(), sliders[1]->GetMaximum());
+			sliders[1]->value = Interpolate(cstick.dy, -146, 146, sliders[0]->GetMinimum(), sliders[1]->GetMaximum());
+			ignoreCstickIfZero = cstickZero;
+		}
 		
 		sf2d_start_frame(GFX_TOP, GFX_LEFT);
 		sf2d_draw_rectangle(0, 0, 400, 240, RGBA8(0xFF, 0xFF, 0xFF, 0xFF));
@@ -268,6 +281,7 @@ int main(int argc, char *argv[])
 	
 	romfsExit();
 	sf2d_fini();
+	irrstExit();
 	
 	return 0;
 }
@@ -429,6 +443,7 @@ void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid)
 	
 	for (int i=0; i<4; i++) {
 		Slider *slider = new Slider();
+		sliders[i] = slider;
 		slider->value = 0.5f;
 		cgrid.cells[i+1][1] = slider;
 		cgrid.cells[i+1][1].colSpan = 5;
