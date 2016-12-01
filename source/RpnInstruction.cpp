@@ -44,6 +44,11 @@ RpnInstruction::Opcode RpnInstruction::GetOpcode() const
 	return op;
 }
 
+const std::string &RpnInstruction::GetName() const
+{
+	return name;
+}
+
 bool RpnInstruction::IsInDomain(float value) const
 {
 	if (value > 0)
