@@ -1,6 +1,8 @@
 #include "TinyExpr.h"
 #include <limits>
 
+double TinyExpr::x = 1.23456f;
+
 TinyExpr::TinyExpr()
 {
 }
@@ -16,21 +18,11 @@ TinyExpr::TinyExpr(const char *expression)
 	}
 }
 
-double TinyExpr::Evaluate(double x)
+double TinyExpr::Evaluate(double x) const
 {
 	if (!error) {
 		this->x = x;
 		return te_eval(expr.get());
-	} else {
-		return std::numeric_limits<double>::quiet_NaN();
-	}
-}
-
-double TinyExpr::Evaluate(double x) const
-{
-	if (!error) {
-		TinyExpr expr2 = *this;
-		return expr2.Evaluate(x);
 	} else {
 		return std::numeric_limits<double>::quiet_NaN();
 	}
