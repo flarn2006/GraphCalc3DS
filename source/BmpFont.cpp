@@ -165,12 +165,12 @@ void BmpFont::splitToLines(const std::string &str, std::vector<std::string> &lin
                 ignoreWhitespace = true;
             }
 
-            if ((!ignoreWhitespace || ch != ' ') && ch != '\n') {
+            if ((!ignoreWhitespace || (ch != ' ' && ch != '\t')) && ch != '\n') {
                 curWord << ch;
                 curX += curCharWidth;
             }
 
-            if (ch == ' ' || ch == '\n' || ch == '-') {
+            if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '-') {
                 words.push_back(curWord.str());
                 curWord.str("");
                 curX = 0;
@@ -239,10 +239,24 @@ u32 BmpFont::drawStrInternal(const std::string &str, int x, int y, u32 color) co
     }
 
     for (const auto &ch : str) {
-        curX += drawChar(ch, x + curX, y, color);
+		if (ch == '\t')
+			curX = nextTabPos(curX);
+		else
+			curX += drawChar(ch, x + curX, y, color);
         if (curX > width) width = curX;
     }
     return width;
+}
+
+u32 BmpFont::nextTabPos(u32 currentPos) const
+{
+	u32 newPos = currentPos;
+	if (newPos % tabWidth == 0)
+		newPos += tabWidth;
+	else
+		// Move ahead to the next multiple of tabWidth
+		newPos += tabWidth - newPos % tabWidth;
+	return newPos;
 }
 
 u32 BmpFont::drawStr(const std::string &str, int x, int y, u32 color) const
@@ -276,7 +290,10 @@ u32 BmpFont::getLineWidth(const std::string &line) const
 {
     u32 width = 0;
     for (const auto &ch : line) {
-        width += data->charWidths[(unsigned char)ch];
+		if (ch == '\t')
+			width = nextTabPos(width);
+		else
+			width += data->charWidths[(unsigned char)ch];
     }
     return width;
 }
@@ -366,6 +383,24 @@ BmpFont BmpFont::unclip() const
 bool BmpFont::isClipped() const
 {
     return (clipLeft != 0) || (clipTop != 0) || (clipRight != 0) || (clipBottom != 0);
+}
+
+BmpFont &BmpFont::setTabWidth(u32 width)
+{
+	tabWidth = width;
+	return *this;
+}
+
+BmpFont BmpFont::setTabWidth(u32 width) const
+{
+	BmpFont bf = *this;
+	bf.setTabWidth(width);
+	return bf;
+}
+
+u32 BmpFont::getTabWidth() const
+{
+	return tabWidth;
 }
 
 BmpFont::operator bool() const

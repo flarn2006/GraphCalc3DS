@@ -34,12 +34,14 @@ private:
     std::shared_ptr<FontData> data;
     TextAlignment alignment;
     int clipLeft, clipTop, clipRight, clipBottom;
+	u32 tabWidth = 50;
     
     static constexpr u32 WHITE = RGBA8(0xFF, 0xFF, 0xFF, 0xFF);
     
     void splitToLines(const std::string &str, std::vector<std::string> &lines, int wrapWidth) const;
     u32 drawStrInternal(const std::string &str, int x, int y, u32 color) const;
     u32 getLineWidth(const std::string &line) const;
+	u32 nextTabPos(u32 currentPos) const;
 
 public:
     BmpFont();
@@ -62,6 +64,10 @@ public:
     BmpFont &unclip();
     BmpFont unclip() const;
     bool isClipped() const;
+
+	BmpFont &setTabWidth(u32 width);
+	BmpFont setTabWidth(u32 width) const;
+	u32 getTabWidth() const;
     
     operator bool() const;
     u32 height() const;
