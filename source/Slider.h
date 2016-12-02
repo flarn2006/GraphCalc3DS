@@ -3,24 +3,24 @@
 
 class Slider : public Control
 {
-	float min, max;
+	double min, max;
 	int width;
 	
 	void TouchingAnywhere(int x, int y);
 	
 public:
-	float value;
+	double value;
 	
 	Slider();
-	Slider(float min, float max);
+	Slider(double min, double max);
 	
 	virtual void Draw(int x, int y, int w, int h);
 	virtual void TouchingInside(int x, int y);
 	virtual void TouchingOutside(int x, int y);
 	
-	void SetRange(float min, float max);
-	void SetMinimum(float min);
-	void SetMaximum(float max);
-	float GetMinimum() const;
-	float GetMaximum() const;
+	void SetRange(double min, double max);
+	void SetMinimum(double min);
+	void SetMaximum(double max);
+	double GetMinimum() const;
+	double GetMaximum() const;
 };

@@ -10,12 +10,12 @@ extern int keys;
 
 Slider::Slider()
 {
-	value = 0.0f;
-	min = 0.0f;
-	max = 1.0f;
+	value = 0.0;
+	min = 0.0;
+	max = 1.0;
 }
 
-Slider::Slider(float min, float max)
+Slider::Slider(double min, double max)
 {
 	value = min;
 	this->min = min;
@@ -24,7 +24,7 @@ Slider::Slider(float min, float max)
 
 void Slider::TouchingAnywhere(int x, int y)
 {
-	value = Interpolate((float)x, 1.0f, (float)(width - 2), min, max);
+	value = Interpolate((double)x, 1.0, (double)(width - 2), min, max);
 	
 	if (keys & (KEY_L | KEY_R)) {
 		if (value < min) min = value;
@@ -38,7 +38,7 @@ void Slider::TouchingAnywhere(int x, int y)
 void Slider::Draw(int x, int y, int w, int h)
 {
 	width = w;
-	int fillWidth = (int)Interpolate(value, min, max, 0.0f, (float)(w - 2));
+	int fillWidth = (int)Interpolate(value, min, max, 0.0, (double)(w - 2));
 	sf2d_draw_rectangle_gradient(x+1, y+1, w-2, h-2, RGBA8(0xF0, 0xF0, 0xF0, 0xFF), RGBA8(0xFF, 0xFF, 0xFF, 0xFF), SF2D_TOP_TO_BOTTOM);
 	sf2d_draw_rectangle(x+1, y+1, fillWidth, h-2, RGBA8(0x00, 0xCC, 0xFF, 0xFF));
     mainFont.drawStr(ssprintf("%.5f", value), x + 8, y + h/2 - mainFont.height()/2, RGBA8(0x00, 0x00, 0x00, 0xFF));
@@ -57,29 +57,29 @@ void Slider::TouchingOutside(int x, int y)
 	TouchingAnywhere(x, y);
 }
 
-void Slider::SetRange(float min, float max)
+void Slider::SetRange(double min, double max)
 {
 	if (min > max) std::swap(min, max);
 	this->min = min;
 	this->max = max;
 }
 
-void Slider::SetMinimum(float min)
+void Slider::SetMinimum(double min)
 {
 	if (min < max) this->min = min;
 }
 
-void Slider::SetMaximum(float max)
+void Slider::SetMaximum(double max)
 {
 	if (max > min) this->max = max;
 }
 
-float Slider::GetMinimum() const
+double Slider::GetMinimum() const
 {
 	return min;
 }
 
-float Slider::GetMaximum() const
+double Slider::GetMaximum() const
 {
 	return max;
 }

@@ -1,8 +1,8 @@
 #include "Common.h"
 
-float Interpolate(float value, float inputMin, float inputMax, float outputMin, float outputMax)
+double Interpolate(double value, double inputMin, double inputMax, double outputMin, double outputMax)
 {
-	float x = (value - inputMin) / (inputMax - inputMin);
+	double x = (value - inputMin) / (inputMax - inputMin);
 	return x * (outputMax - outputMin) + outputMin;
 }
 

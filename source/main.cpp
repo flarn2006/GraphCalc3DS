@@ -16,7 +16,7 @@
 constexpr int plotCount = 4;
 
 std::vector<RpnInstruction> equations[plotCount];
-float exprX;
+double exprX;
 BmpFont mainFont, btnFont;
 TextDisplay *equDisp;
 Control *btnBackspace;
@@ -26,7 +26,7 @@ int cgridIndex = 0;
 int plotIndex = 0;
 int keys = 0, down = 0;
 bool altMode = false;
-ViewWindow view(-5.0f, 5.0f, -3.0f, 3.0f);
+ViewWindow view(-5.0, 5.0, -3.0, 3.0);
 Slider *sliders[4];
 
 const int plotColors[] = { RGBA8(0x00, 0x00, 0xC0, 0xFF), RGBA8(0x00, 0x80, 0x00, 0xFF), RGBA8(0xD5, 0x00, 0xDD, 0xFF), RGBA8(0xD2, 0x94, 0x00, 0xFF) };
@@ -36,7 +36,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid);
 void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid);
 SwkbdCallbackResult ValidateSwkbdExpr(void *user, const char **ppMessage, const char *text, size_t textlen);
 
-void drawAxes(const ViewWindow &view, u32 color, float originX = 0.0f, float originY = 0.0f, bool hideHorizontal = false)
+void drawAxes(const ViewWindow &view, u32 color, double originX = 0.0, double originY = 0.0, bool hideHorizontal = false)
 {
 	Point<int> center = view.GetScreenCoords(originX, originY);
 	if (0 <= center.x && center.x < 400) {
@@ -54,13 +54,13 @@ void drawGraph(const std::vector<RpnInstruction> &equation, const ViewWindow &vi
 	
 	for (int x=0; x<400; x++) {
 		Point<int> pt;
-		exprX = Interpolate((float)x, 0.0f, 399.0f, view.xmin, view.xmax);
-		float y;
+		exprX = Interpolate((double)x, 0.0, 399.0, view.xmin, view.xmax);
+		double y;
 		RpnInstruction::Status status = ExecuteRpn(equation, y);
 		pt = view.GetScreenCoords(exprX, y);
 		
 		if (status == RpnInstruction::S_OK && !ignoreLastPoint) {
-			sf2d_draw_line(lastPoint.x, lastPoint.y, pt.x, pt.y, 2.0f, color);
+			sf2d_draw_line(lastPoint.x, lastPoint.y, pt.x, pt.y, 2.0, color);
 		} else if (status == RpnInstruction::S_OVERFLOW) {
 			if (showErrors) {
                 mainFont.drawStr("Error: Stack overflow", 4, 4, color);
@@ -79,19 +79,19 @@ void drawGraph(const std::vector<RpnInstruction> &equation, const ViewWindow &vi
 	}
 }
 
-void moveCursor(float &cursorX, float &cursorY, float dx, float dy)
+void moveCursor(double &cursorX, double &cursorY, double dx, double dy)
 {
 	cursorX += dx;
-	if (cursorX < 0.0f)
-		cursorX = 0.0f;
-	else if (cursorX > 399.0f)
-		cursorX = 399.0f;
+	if (cursorX < 0.0)
+		cursorX = 0.0;
+	else if (cursorX > 399.0)
+		cursorX = 399.0;
 	
 	cursorY += dy;
-	if (cursorY < 0.0f)
-		cursorY = 0.0f;
-	else if (cursorY > 239.0f)
-		cursorY = 239.0f;
+	if (cursorY < 0.0)
+		cursorY = 0.0;
+	else if (cursorY > 239.0)
+		cursorY = 239.0;
 }
 
 void addInstruction(const RpnInstruction &inst)
@@ -105,8 +105,8 @@ void addInstruction(const RpnInstruction &inst)
 
 int main(int argc, char *argv[])
 {
-	float cursorX = 200.0f, cursorY = 120.0f;
-	float traceUnit = 0;
+	double cursorX = 200.0, cursorY = 120.0;
+	double traceUnit = 0;
 	bool traceUndefined = false;
 	
 	equations[0].push_back(RpnInstruction(&exprX, "x"));
@@ -171,11 +171,11 @@ int main(int argc, char *argv[])
 		}
 		
 		if ((keys & KEY_L) && !(keys & KEY_TOUCH)) {
-			view.ZoomOut(1.02f);
+			view.ZoomOut(1.02);
 		}
 		
 		if ((keys & KEY_R) && !(keys & KEY_TOUCH)) {
-			view.ZoomIn(1.02f);
+			view.ZoomIn(1.02);
 		}
 		
 		if ((down & KEY_SELECT) && !(keys & KEY_TOUCH)) {
@@ -184,8 +184,8 @@ int main(int argc, char *argv[])
 		
 		if (down & (KEY_DUP | KEY_DDOWN)) {
 			if (keys & KEY_X) {
-				if (down & KEY_DUP) moveCursor(cursorX, cursorY, 0.0f, -1.0f);
-				if (down & KEY_DDOWN) moveCursor(cursorX, cursorY, 0.0f, 1.0f);
+				if (down & KEY_DUP) moveCursor(cursorX, cursorY, 0.0, -1.0);
+				if (down & KEY_DDOWN) moveCursor(cursorX, cursorY, 0.0, 1.0);
 			} else {
 				numpad.Reset();
 				
@@ -203,8 +203,8 @@ int main(int argc, char *argv[])
 		
 		if (down & (KEY_DLEFT | KEY_DRIGHT)) {
 			if (keys & (KEY_X | KEY_Y)) {
-				if (down & KEY_DLEFT) moveCursor(cursorX, cursorY, -1.0f, 0.0f);
-				if (down & KEY_DRIGHT) moveCursor(cursorX, cursorY, 1.0f, 0.0f);
+				if (down & KEY_DLEFT) moveCursor(cursorX, cursorY, -1.0, 0.0);
+				if (down & KEY_DRIGHT) moveCursor(cursorX, cursorY, 1.0, 0.0);
 			} else if (!(keys & KEY_TOUCH)) {
 				if (down & KEY_DLEFT) --cgridIndex;
 				if (down & KEY_DRIGHT) ++cgridIndex;
@@ -223,11 +223,11 @@ int main(int argc, char *argv[])
 		
 		if (circle.dx * circle.dx + circle.dy * circle.dy > 20*20) {
 			if (keys & (KEY_X | KEY_Y)) {
-				moveCursor(cursorX, cursorY, 0.05f * circle.dx, -0.05f * circle.dy);
+				moveCursor(cursorX, cursorY, 0.05 * circle.dx, -0.05 * circle.dy);
 			} else {
-				float rangeX = view.xmax - view.xmin;
-				float rangeY = view.ymax - view.ymin;
-				view.Pan(0.0002f * rangeX * circle.dx, 0.0002f * rangeY * circle.dy);
+				double rangeX = view.xmax - view.xmin;
+				double rangeY = view.ymax - view.ymin;
+				view.Pan(0.0002 * rangeX * circle.dx, 0.0002 * rangeY * circle.dy);
 			}
 		}
 
@@ -250,10 +250,10 @@ int main(int argc, char *argv[])
 		}
 		
 		if (keys & (KEY_X | KEY_Y)) {
-			Point<float> cursor = view.GetGraphCoords(cursorX, cursorY);
+			Point<double> cursor = view.GetGraphCoords(cursorX, cursorY);
 			if (keys & KEY_Y) {
 				if (keys & KEY_B) {
-					traceUnit = std::pow(10.0f, std::ceil(std::log10((view.xmax - view.xmin) / 400)));
+					traceUnit = std::pow(10.0, std::ceil(std::log10((view.xmax - view.xmin) / 400)));
 					cursor.x = std::round(cursor.x / traceUnit) * traceUnit;
 				}
 				exprX = cursor.x;
@@ -380,7 +380,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 					//clear button
 					btn->SetAction([](Button&) {
 						if (altMode) {
-							view = ViewWindow(-5.0f, 5.0f, -3.0f, 3.0f);
+							view = ViewWindow(-5.0, 5.0, -3.0, 3.0);
 						} else {
 							equations[plotIndex].clear();
 							numpad.Reset();
@@ -444,7 +444,7 @@ void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid)
 	for (int i=0; i<4; i++) {
 		Slider *slider = new Slider();
 		sliders[i] = slider;
-		slider->value = 0.5f;
+		slider->value = 0.5;
 		cgrid.cells[i+1][1] = slider;
 		cgrid.cells[i+1][1].colSpan = 5;
 		
@@ -467,8 +467,8 @@ void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid)
 			if (altMode) {
 				slider->SetMaximum(slider->value);
 			} else {
-				slider->SetRange(0.0f, 1.0f);
-				slider->value = 0.5f;
+				slider->SetRange(0.0, 1.0);
+				slider->value = 0.5;
 			}
 		});
 		cgrid.cells[i+1][6].content = btn;

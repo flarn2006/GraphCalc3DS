@@ -39,34 +39,34 @@ public:
 		D_ALL = D_ZERO | D_POSITIVE | D_NEGATIVE
 	};
 	
-	typedef float (*func_t)(float);
+	typedef double (*func_t)(double);
 	
 private:
 	Opcode op;
 	// Not all of these will be used at the same time.
 	// Which one(s) depends on the opcode.
-	float value;
-	const float *var;
+	double value;
+	const double *var;
 	func_t func;
 	int domain;
 	TinyExpr expr;
 	std::string name;
 
-	bool IsInDomain(float value) const;
+	bool IsInDomain(double value) const;
 	
 public:
 	RpnInstruction();
 	RpnInstruction(Opcode opcode);
-	RpnInstruction(float value);
-	RpnInstruction(const float *var, const char *name);
+	RpnInstruction(double value);
+	RpnInstruction(const double *var, const char *name);
 	RpnInstruction(func_t func, const char *name, int domain = D_ALL);
 	RpnInstruction(const char *expression);
 	
 	Opcode GetOpcode() const;
 	const std::string &GetName() const;
-	Status Execute(std::vector<float> &stack) const;
+	Status Execute(std::vector<double> &stack) const;
 };
 
 std::ostream &operator<<(std::ostream &os, const RpnInstruction &inst);
 
-RpnInstruction::Status ExecuteRpn(const std::vector<RpnInstruction> instructions, float &resultOut);
+RpnInstruction::Status ExecuteRpn(const std::vector<RpnInstruction> instructions, double &resultOut);

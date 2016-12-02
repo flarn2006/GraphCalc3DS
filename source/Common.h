@@ -62,7 +62,7 @@ struct Rect
 	}
 };
 
-float Interpolate(float value, float inputMin, float inputMax, float outputMin, float outputMax);
+double Interpolate(double value, double inputMin, double inputMax, double outputMin, double outputMax);
 
 std::string vssprintf(const char *format, va_list arg);
 std::string ssprintf(const char *format, ...);

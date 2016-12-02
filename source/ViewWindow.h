@@ -3,23 +3,23 @@
 
 class ViewWindow
 {
-	static constexpr float sxmin = 0.0f;
-	static constexpr float sxmax = 399.0f;
-	static constexpr float symin = 239.0f;
-	static constexpr float symax = 0.0f;
+	static constexpr double sxmin = 0.0;
+	static constexpr double sxmax = 399.0;
+	static constexpr double symin = 239.0;
+	static constexpr double symax = 0.0;
 	
 public:
-	float xmin, xmax;
-	float ymin, ymax;
+	double xmin, xmax;
+	double ymin, ymax;
 	
-	ViewWindow(float xMin, float xMax, float yMin, float yMax);
+	ViewWindow(double xMin, double xMax, double yMin, double yMax);
 	
-	Point<int> GetScreenCoords(float x, float y) const;
-	Point<int> GetScreenCoords(Point<float> point) const;
-	Point<float> GetGraphCoords(int x, int y) const;
-	Point<float> GetGraphCoords(Point<int> point) const;
+	Point<int> GetScreenCoords(double x, double y) const;
+	Point<int> GetScreenCoords(Point<double> point) const;
+	Point<double> GetGraphCoords(int x, int y) const;
+	Point<double> GetGraphCoords(Point<int> point) const;
 	
-	void Pan(float x, float y);
-	void ZoomIn(float factor);
-	void ZoomOut(float factor);
+	void Pan(double x, double y);
+	void ZoomIn(double factor);
+	void ZoomOut(double factor);
 };

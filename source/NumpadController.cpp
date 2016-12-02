@@ -46,7 +46,7 @@ NumpadController::Reply NumpadController::KeyPressed(char key, const RpnInstruct
 		}
 	}
 	
-	float value = std::atof(entry.c_str());
+	double value = std::atof(entry.c_str());
 	if (negative) value = -value;
 	reply.inst = value;
 	

@@ -1,6 +1,6 @@
 #include "ViewWindow.h"
 
-ViewWindow::ViewWindow(float xMin, float xMax, float yMin, float yMax)
+ViewWindow::ViewWindow(double xMin, double xMax, double yMin, double yMax)
 {
 	xmin = xMin;
 	xmax = xMax;
@@ -8,31 +8,31 @@ ViewWindow::ViewWindow(float xMin, float xMax, float yMin, float yMax)
 	ymax = yMax;
 }
 
-Point<int> ViewWindow::GetScreenCoords(float x, float y) const
+Point<int> ViewWindow::GetScreenCoords(double x, double y) const
 {
 	int sx = (int)Interpolate(x, xmin, xmax, sxmin, sxmax);
 	int sy = (int)Interpolate(y, ymin, ymax, symin, symax);
 	return Point<int>(sx, sy);
 }
 
-Point<int> ViewWindow::GetScreenCoords(Point<float> point) const
+Point<int> ViewWindow::GetScreenCoords(Point<double> point) const
 {
 	return GetScreenCoords(point.x, point.y);
 }
 
-Point<float> ViewWindow::GetGraphCoords(int x, int y) const
+Point<double> ViewWindow::GetGraphCoords(int x, int y) const
 {
-	float gx = Interpolate((float)x, sxmin, sxmax, xmin, xmax);
-	float gy = Interpolate((float)y, symin, symax, ymin, ymax);
-	return Point<float>(gx, gy);
+	double gx = Interpolate((double)x, sxmin, sxmax, xmin, xmax);
+	double gy = Interpolate((double)y, symin, symax, ymin, ymax);
+	return Point<double>(gx, gy);
 }
 
-Point<float> ViewWindow::GetGraphCoords(Point<int> point) const
+Point<double> ViewWindow::GetGraphCoords(Point<int> point) const
 {
 	return GetGraphCoords(point.x, point.y);
 }
 
-void ViewWindow::Pan(float x, float y)
+void ViewWindow::Pan(double x, double y)
 {
 	xmin += x;
 	xmax += x;
@@ -40,17 +40,17 @@ void ViewWindow::Pan(float x, float y)
 	ymax += y;
 }
 
-void ViewWindow::ZoomIn(float factor)
+void ViewWindow::ZoomIn(double factor)
 {
-	ZoomOut(1.0f / factor);
+	ZoomOut(1.0 / factor);
 }
 
-void ViewWindow::ZoomOut(float factor)
+void ViewWindow::ZoomOut(double factor)
 {
-	float centerX = (xmin + xmax) / 2;
-	float centerY = (ymin + ymax) / 2;
-	xmin = Interpolate(factor, 1.0f, 0.0f, xmin, centerX);
-	xmax = Interpolate(factor, 1.0f, 0.0f, xmax, centerX);
-	ymin = Interpolate(factor, 1.0f, 0.0f, ymin, centerY);
-	ymax = Interpolate(factor, 1.0f, 0.0f, ymax, centerY);
+	double centerX = (xmin + xmax) / 2;
+	double centerY = (ymin + ymax) / 2;
+	xmin = Interpolate(factor, 1.0, 0.0, xmin, centerX);
+	xmax = Interpolate(factor, 1.0, 0.0, xmax, centerX);
+	ymin = Interpolate(factor, 1.0, 0.0, ymin, centerY);
+	ymax = Interpolate(factor, 1.0, 0.0, ymax, centerY);
 }

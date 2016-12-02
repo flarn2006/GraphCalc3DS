@@ -11,13 +11,13 @@ RpnInstruction::RpnInstruction(Opcode opcode)
 	op = opcode;
 }
 
-RpnInstruction::RpnInstruction(float value)
+RpnInstruction::RpnInstruction(double value)
 {
 	op = OP_PUSH;
 	this->value = value;
 }
 
-RpnInstruction::RpnInstruction(const float *var, const char *name)
+RpnInstruction::RpnInstruction(const double *var, const char *name)
 {
 	op = OP_PUSHVAR;
 	this->var = var;
@@ -49,7 +49,7 @@ const std::string &RpnInstruction::GetName() const
 	return name;
 }
 
-bool RpnInstruction::IsInDomain(float value) const
+bool RpnInstruction::IsInDomain(double value) const
 {
 	if (value > 0)
 		return domain & D_POSITIVE;
@@ -60,7 +60,7 @@ bool RpnInstruction::IsInDomain(float value) const
 	return false; //Shouldn't happen in practice, but I don't think it's logically impossible. NaN maybe?
 }
 
-RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
+RpnInstruction::Status RpnInstruction::Execute(std::vector<double> &stack) const
 {
 	switch (op) {
 		case OP_PUSH:
@@ -73,9 +73,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float y = stack.back();
+				double y = stack.back();
 				stack.pop_back();
-				float x = stack.back();
+				double x = stack.back();
 				stack.pop_back();
 				stack.push_back(x + y);
 				return S_OK;
@@ -84,9 +84,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float y = stack.back();
+				double y = stack.back();
 				stack.pop_back();
-				float x = stack.back();
+				double x = stack.back();
 				stack.pop_back();
 				stack.push_back(x - y);
 				return S_OK;
@@ -95,9 +95,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float y = stack.back();
+				double y = stack.back();
 				stack.pop_back();
-				float x = stack.back();
+				double x = stack.back();
 				stack.pop_back();
 				stack.push_back(x * y);
 				return S_OK;
@@ -106,9 +106,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float y = stack.back();
+				double y = stack.back();
 				stack.pop_back();
-				float x = stack.back();
+				double x = stack.back();
 				stack.pop_back();
 				if (y == 0) {
 					return S_UNDEFINED;
@@ -121,9 +121,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float y = stack.back();
+				double y = stack.back();
 				stack.pop_back();
-				float x = stack.back();
+				double x = stack.back();
 				stack.pop_back();
 				if (y == 0) {
 					return S_UNDEFINED;
@@ -136,9 +136,9 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() < 2) {
 				return S_UNDERFLOW;
 			} else {
-				float y = stack.back();
+				double y = stack.back();
 				stack.pop_back();
-				float x = stack.back();
+				double x = stack.back();
 				stack.pop_back();
 				stack.push_back(std::pow(x, y));
 				return S_OK;
@@ -147,7 +147,7 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() == 0) {
 				return S_UNDERFLOW;
 			} else {
-				float &back = stack.back();
+				double &back = stack.back();
 				back = -back;
 				return S_OK;
 			}
@@ -155,7 +155,7 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() == 0) {
 				return S_UNDERFLOW;
 			} else {
-				float &back = stack.back();
+				double &back = stack.back();
 				if (IsInDomain(back)) {
 					back = func(back);
 					return S_OK;
@@ -174,7 +174,7 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<float> &stack) const
 			if (stack.size() == 0) {
 				return S_UNDERFLOW;
 			} else {
-				float &back = stack.back();
+				double &back = stack.back();
 				back = expr.Evaluate(back);
 				return S_OK;
 			}
@@ -226,9 +226,9 @@ std::ostream &operator<<(std::ostream &os, const RpnInstruction &inst)
 	return os;
 }
 
-RpnInstruction::Status ExecuteRpn(const std::vector<RpnInstruction> instructions, float &resultOut)
+RpnInstruction::Status ExecuteRpn(const std::vector<RpnInstruction> instructions, double &resultOut)
 {
-	std::vector<float> stack;
+	std::vector<double> stack;
 	
 	for (auto i = instructions.begin(); i != instructions.end(); i++) {
 		RpnInstruction::Status status = i->Execute(stack);

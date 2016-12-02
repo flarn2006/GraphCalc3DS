@@ -1,7 +1,7 @@
 #include "TinyExpr.h"
 #include <limits>
 
-double TinyExpr::x = 1.23456f;
+double TinyExpr::x = 1.23456;
 
 TinyExpr::TinyExpr()
 {
