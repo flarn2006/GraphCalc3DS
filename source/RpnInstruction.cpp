@@ -218,7 +218,7 @@ std::ostream &operator<<(std::ostream &os, const RpnInstruction &inst)
 			os << "dup";
 			break;
 		case RpnInstruction::OP_EXPR:
-			os << inst.name;
+			os << "[ " << inst.name << " ]";
 			break;
 		default:
 			os << "???";

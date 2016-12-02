@@ -150,21 +150,28 @@ int main(int argc, char *argv[])
 			swkbdInit(&swkbd, SWKBD_TYPE_QWERTY, 2, 512);
 			swkbdSetValidation(&swkbd, SWKBD_NOTEMPTY_NOTBLANK, SWKBD_FILTER_CALLBACK, 0);
 			swkbdSetFilterCallback(&swkbd, ValidateSwkbdExpr, nullptr);
-			swkbdSetHintText(&swkbd, "Enter a function of 'x'\nexample: sin(x)+cos(2*x)");
+
+			if (altMode) {
+				swkbdSetHintText(&swkbd, "Enter a function of 'x'\n(ALT active; will append to RPN.)");
+			} else {
+				swkbdSetHintText(&swkbd, "Enter a function of 'x'\nexample: sin(x)+cos(2*x)");
+			}
 
 			if (!equations[plotIndex].empty()) {
 				const RpnInstruction &inst = equations[plotIndex].back();
-				if (inst.GetOpcode() == RpnInstruction::OP_EXPR) {
-					std::ostringstream ss;
-					ss << equations[plotIndex].back();
-					swkbdSetInitialText(&swkbd, ss.str().c_str());
+				if (!altMode && inst.GetOpcode() == RpnInstruction::OP_EXPR) {
+					swkbdSetInitialText(&swkbd, inst.GetName().c_str());
 				}
 			}
 
 			char buf[512];
 			if (swkbdInputText(&swkbd, buf, 512) == SWKBD_BUTTON_RIGHT) {
-				equations[plotIndex].clear();
-				equations[plotIndex].emplace_back(&exprX, "y =");
+				if (!altMode) {
+					equations[plotIndex].clear();
+					equations[plotIndex].emplace_back(&exprX, "y =");
+				} else {
+					altMode = false;
+				}
 				equations[plotIndex].emplace_back(buf);
 				UpdateEquationDisplay();
 			}
