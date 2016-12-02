@@ -473,4 +473,6 @@ void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid)
 		});
 		cgrid.cells[i+1][6].content = btn;
 	}
+
+	TinyExpr::SetABCDVars(&sliders[0]->value, &sliders[1]->value, &sliders[2]->value, &sliders[3]->value);
 }
