@@ -17,7 +17,7 @@ constexpr int plotCount = 4;
 
 std::vector<RpnInstruction> equations[plotCount];
 double exprX;
-BmpFont mainFont, btnFont;
+BmpFont mainFont, btnFont, smallFont;
 TextDisplay *equDisp;
 Control *btnBackspace;
 NumpadController numpad;
@@ -51,6 +51,7 @@ void drawGraph(const std::vector<RpnInstruction> &equation, const ViewWindow &vi
 {
 	Point<int> lastPoint;
 	bool ignoreLastPoint = true;
+	bool showRPNHint = false;
 	
 	for (int x=0; x<400; x++) {
 		Point<int> pt;
@@ -64,18 +65,29 @@ void drawGraph(const std::vector<RpnInstruction> &equation, const ViewWindow &vi
 		} else if (status == RpnInstruction::S_OVERFLOW) {
 			if (showErrors) {
                 mainFont.drawStr("Error: Stack overflow", 4, 4, color);
+				showRPNHint = true;
 			}
 			break;
 		} else if (status == RpnInstruction::S_UNDERFLOW) {
 			if (showErrors) {
                 mainFont.drawStr("Error: Stack underflow", 4, 4, color);
+				showRPNHint = true;
 			}
 			break;
 		} else {
 			ignoreLastPoint = (status == RpnInstruction::S_UNDEFINED);
 		}
-		
+
 		lastPoint = pt;
+	}
+		
+	if (showRPNHint) {
+		const char *text;
+		if (altMode)
+			text = "(Press Select, A if you don't know RPN.)";
+		else
+			text = "(Press A if you don't know RPN.)";
+		smallFont.drawStr(text, 4, 23, color);
 	}
 }
 
@@ -130,6 +142,7 @@ int main(int argc, char *argv[])
 	romfsInit();
 	mainFont.load("romfs:/mainfont.bff");
     btnFont.load("romfs:/buttons.bff");
+	smallFont.load("romfs:/small.bff");
 	
 	while (aptMainLoop()) {
 		hidScanInput();
