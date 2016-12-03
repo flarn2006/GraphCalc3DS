@@ -176,7 +176,7 @@ RpnInstruction::Status RpnInstruction::Execute(std::vector<double> &stack) const
 			} else {
 				double &back = stack.back();
 				back = expr.Evaluate(back);
-				return S_OK;
+				return std::isfinite(back) ? S_OK : S_UNDEFINED;
 			}
 		default:
 			return S_UNDEFINED;
