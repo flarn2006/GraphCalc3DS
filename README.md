@@ -25,5 +25,11 @@ You will then see four sliders, labeled 'a', 'b', 'c', and 'd'. The labels to th
 
 ## Important notes
 
-* Equations must be entered in RPN (Reverse Polish Notation). This means, for example, rather than "sin(4 + x)", you would enter "4 x + sin".
+* By default, equations are entered in RPN ([Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_Notation)). This means, for example, rather than "sin(4 + x)", you would enter "4 x + sin". You can still enter equations the traditional way (e.g. "sin(4 + x)") by pressing A and using the on-screen keyboard. (Pressing A in alt mode will insert the function of X as an RPN function instead of replacing the existing expression.)
 * If you've entered a number and want to start entering a new number immediately after, press the decimal point key twice, or only once if there's already a decimal point.
+
+## Libraries used
+
+* [sf2dlib](https://github.com/xerpi/sf2dlib), by xerpi
+* [SF2DBmpFont](https://github.com/flarn2006/SF2DBmpFont), by myself (included in source code download)
+* [tinyexpr](https://github.com/codeplea/tinyexpr), by codeplea (included as submodule, use `git clone --recursive`)
