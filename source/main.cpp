@@ -345,7 +345,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 	const char *btnText[5][7] = {
 		{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, "\xAB"},
 		{"7",     "8",     "9",     "\xF7",  "^",     "mod",   "abs"},
-		{"4",     "5",     "6",     "\xD7",  "sqrt",  "exp",   "ln"},
+		{"4",     "5",     "6",     "*",  "sqrt",  "exp",   "ln"},
 		{"1",     "2",     "3",     "-",     "sin",   "cos",   "tan"},
 		{"0",     ".",     "+/-",   "+",     "x",     "clear", nullptr}
 	};

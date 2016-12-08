@@ -196,7 +196,7 @@ std::ostream &operator<<(std::ostream &os, const RpnInstruction &inst)
 			os << '-';
 			break;
 		case RpnInstruction::OP_MULTIPLY:
-			os << '\xD7';
+			os << '*';
 			break;
 		case RpnInstruction::OP_DIVIDE:
 			os << '\xF7';
