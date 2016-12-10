@@ -6,6 +6,7 @@ ViewWindow::ViewWindow(double xMin, double xMax, double yMin, double yMax)
 	xmax = xMax;
 	ymin = yMin;
 	ymax = yMax;
+	offsetInvalid = true;
 }
 
 Point<int> ViewWindow::GetScreenCoords(double x, double y) const
@@ -38,6 +39,7 @@ void ViewWindow::Pan(double x, double y)
 	xmax += x;
 	ymin += y;
 	ymax += y;
+	offset -= x;
 }
 
 void ViewWindow::ZoomIn(double factor)
@@ -53,4 +55,19 @@ void ViewWindow::ZoomOut(double factor)
 	xmax = Interpolate(factor, 1.0, 0.0, xmax, centerX);
 	ymin = Interpolate(factor, 1.0, 0.0, ymin, centerY);
 	ymax = Interpolate(factor, 1.0, 0.0, ymax, centerY);
+	offsetInvalid = true;
+}
+
+int ViewWindow::GetOffset() const
+{
+	if (offsetInvalid)
+		return (int)sxmax + 1;
+	else
+		return (int)Interpolate(offset, xmin, xmax, sxmin, sxmax);
+}
+
+void ViewWindow::ResetOffset()
+{
+	offset = 0.0;
+	offsetInvalid = false;
 }

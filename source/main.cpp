@@ -28,10 +28,13 @@ int keys = 0, down = 0;
 bool altMode = false;
 ViewWindow view(-5.0, 5.0, -3.0, 3.0);
 Slider *sliders[4];
+double plotCache[400*plotCount];
+bool plotNeedsUpdate[plotCount];
 
 const int plotColors[] = { RGBA8(0x00, 0x00, 0xC0, 0xFF), RGBA8(0x00, 0x80, 0x00, 0xFF), RGBA8(0xD5, 0x00, 0xDD, 0xFF), RGBA8(0xD2, 0x94, 0x00, 0xFF) };
 
 void UpdateEquationDisplay();
+void UpdateEquation(int equNum);
 void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid);
 void SetUpVarsControlGrid(ControlGrid<5, 7> &cgrid);
 SwkbdCallbackResult ValidateSwkbdExpr(void *user, const char **ppMessage, const char *text, size_t textlen);
@@ -47,17 +50,43 @@ void drawAxes(const ViewWindow &view, u32 color, double originX = 0.0, double or
 	}
 }
 
-void drawGraph(const std::vector<RpnInstruction> &equation, const ViewWindow &view, u32 color, bool showErrors = true)
+void drawGraph(int plotNum, ViewWindow &view, u32 color, bool showErrors = true)
 {
 	Point<int> lastPoint;
 	bool ignoreLastPoint = true;
 	bool showRPNHint = false;
+	const std::vector<RpnInstruction> &equation = equations[plotNum];
 	
+	// If the plot was offset since the last time it was drawn, offset the cache accordingly.
+	int offset = view.GetOffset();
+	double *cache = plotCache + 400*plotNum;
+	if (!plotNeedsUpdate[plotNum]) {
+		if (-400 < offset && offset < 0) {
+			// offset is negative here, so '+offset' is really subtraction, and '-offset' is addition;
+			for (int i=0; i<400+offset; ++i) {
+				cache[i] = cache[i-offset];
+			}
+		} else if (0 < offset && offset < 400) {
+			for (int i=offset; i<400; ++i) {
+				cache[i] = cache[i-offset];
+			}
+		}
+	}
+
 	for (int x=0; x<400; x++) {
 		Point<int> pt;
 		exprX = Interpolate((double)x, 0.0, 399.0, view.xmin, view.xmax);
 		double y;
-		RpnInstruction::Status status = ExecuteRpn(equation, y);
+		RpnInstruction::Status status;
+
+		if (plotNeedsUpdate[plotNum] || (offset < 0 && x >= 400+offset) || (offset > 0 && x < offset)) {
+			status = ExecuteRpn(equation, y);
+			cache[x] = y;
+		} else {
+			y = cache[x];
+			status = std::isfinite(y) ? RpnInstruction::S_OK : RpnInstruction::S_UNDEFINED;
+		}
+
 		pt = view.GetScreenCoords(exprX, y);
 		
 		if (status == RpnInstruction::S_OK && !ignoreLastPoint) {
@@ -80,7 +109,10 @@ void drawGraph(const std::vector<RpnInstruction> &equation, const ViewWindow &vi
 
 		lastPoint = pt;
 	}
-		
+	
+	view.ResetOffset();
+	plotNeedsUpdate[plotNum] = false;
+
 	if (showRPNHint) {
 		const char *text;
 		if (altMode)
@@ -112,7 +144,7 @@ void addInstruction(const RpnInstruction &inst)
 		numpad.Reset();
 	}
 	equations[plotIndex].push_back(inst);
-	UpdateEquationDisplay();
+	UpdateEquation(plotIndex);
 }
 
 int main(int argc, char *argv[])
@@ -120,6 +152,14 @@ int main(int argc, char *argv[])
 	double cursorX = 200.0, cursorY = 120.0;
 	double traceUnit = 0;
 	bool traceUndefined = false;
+
+	for (int i=0; i<plotCount; ++i) {
+		double *cache = plotCache + 400*i;
+		for (int j=0; j<400; ++j) {
+			cache[j] = 0.0;
+		}
+		plotNeedsUpdate[i] = true;
+	}
 	
 	equations[0].push_back(RpnInstruction(&exprX, "x"));
 	equations[0].push_back(RpnInstruction(std::sin, "sin"));
@@ -186,7 +226,7 @@ int main(int argc, char *argv[])
 					altMode = false;
 				}
 				equations[plotIndex].emplace_back(buf);
-				UpdateEquationDisplay();
+				UpdateEquation(plotIndex);
 			}
 		}
 		
@@ -266,7 +306,7 @@ int main(int argc, char *argv[])
 		drawAxes(view, RGBA8(0x80, 0xFF, 0xFF, 0xFF));
 		
 		for (int i=0; i<plotCount; i++) {
-			drawGraph(equations[i], view, plotColors[i], i == plotIndex);
+			drawGraph(i, view, plotColors[i], i == plotIndex);
 		}
 		
 		if (keys & (KEY_X | KEY_Y)) {
@@ -324,6 +364,13 @@ void UpdateEquationDisplay()
 	
 	equDisp->SetText(ss.str());
 	equDisp->SetTextColor(plotColors[plotIndex]);
+}
+
+void UpdateEquation(int equNum)
+{
+	plotNeedsUpdate[equNum] = true;
+	if (equNum == plotIndex)
+		UpdateEquationDisplay();
 }
 
 SwkbdCallbackResult ValidateSwkbdExpr(void *user, const char **ppMessage, const char *text, size_t textlen)
@@ -404,7 +451,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 						} else {
 							equations[plotIndex].clear();
 							numpad.Reset();
-							UpdateEquationDisplay();
+							UpdateEquation(plotIndex);
 						}
 					});
 				} else if ((r > 0 && c < 3) || (r == 0 && c == 6)) {
@@ -432,7 +479,7 @@ void SetUpMainControlGrid(ControlGrid<5, 7> &cgrid)
 								equations[plotIndex].push_back(reply.inst);
 							}
 						}
-						UpdateEquationDisplay();
+						UpdateEquation(plotIndex);
 					});
 				} else if (opcode != RpnInstruction::OP_NULL) {
 					//one of the buttons that adds an RPN instruction

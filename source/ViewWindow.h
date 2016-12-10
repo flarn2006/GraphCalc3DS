@@ -11,6 +11,8 @@ class ViewWindow
 public:
 	double xmin, xmax;
 	double ymin, ymax;
+	double offset;
+	bool offsetInvalid;
 	
 	ViewWindow(double xMin, double xMax, double yMin, double yMax);
 	
@@ -22,4 +24,7 @@ public:
 	void Pan(double x, double y);
 	void ZoomIn(double factor);
 	void ZoomOut(double factor);
+
+	int GetOffset() const;
+	void ResetOffset();
 };
