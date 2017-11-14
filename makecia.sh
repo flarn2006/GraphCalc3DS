@@ -14,7 +14,7 @@ sed -i "s/@@UNIQUE_ID@@/$UNIQUE_ID/g" cia.rsf
 echo "> Running make..."
 if make; then
 	arm-none-eabi-strip $PROJNAME.elf -o stripped.elf
-	bannertool makebanner -i banner.png -a audio.wav -o banner.bin
+	bannertool makebanner -ci banner/banner.cgfx -a audio.wav -o banner.bin
 	bannertool makesmdh -s "$SHORTNAME" -l "$LONGNAME" -p "$PUBNAME" -i icon.png -o cia.smdh -r regionfree -f visible
 	echo "> Creating CXI..."
 	makerom -elf stripped.elf -icon cia.smdh -banner banner.bin -rsf cia.rsf -o $PROJNAME.cxi
